@@ -1,78 +1,58 @@
 {
   "moneyline_picks": [
     {
-      "team": "Cowboys",
-      "odds": "-200",
-      "confidence": 81,
+      "team": "Bills",
+      "odds": "-194",
+      "confidence": 82,
       "note": "Elite defense and home advantage"
     },
     {
-      "team": "Rams",
-      "odds": "-151",
-      "confidence": 72,
-      "note": "QB mismatch"
-    },
-    {
       "team": "Packers",
-      "odds": "-130",
-      "confidence": 62,
-      "note": "Injury boost"
-    },
-    {
-      "team": "Seahawks",
-      "odds": "-140",
-      "confidence": 72,
-      "note": "Strong home trends"
-    },
-    {
-      "team": "Giants",
-      "odds": "-198",
-      "confidence": 83,
-      "note": "Revenge game"
-    },
-    {
-      "team": "Cowboys",
-      "odds": "-112",
-      "confidence": 75,
-      "note": "Strong home trends"
-    },
-    {
-      "team": "Seahawks",
-      "odds": "-128",
-      "confidence": 82,
+      "odds": "-141",
+      "confidence": 89,
       "note": "Division rivalry"
+    },
+    {
+      "team": "Eagles",
+      "odds": "-240",
+      "confidence": 79,
+      "note": "Elite defense and home advantage"
+    },
+    {
+      "team": "Vikings",
+      "odds": "-244",
+      "confidence": 88,
+      "note": "Strong home trends"
     }
   ],
   "parlay_recommendations": [
     {
       "legs": [
+        "Eagles ML",
+        "49ers ML"
+      ],
+      "risk": "Aggressive",
+      "payout": "+484",
+      "note": "Hot streak"
+    },
+    {
+      "legs": [
         "Rams ML",
-        "Giants ML"
+        "Rams ML"
       ],
       "risk": "Aggressive",
-      "payout": "+1049",
+      "payout": "+1083",
       "note": "Division rivalry"
     },
     {
       "legs": [
-        "Jets ML",
-        "Patriots ML",
-        "Chiefs ML"
+        "Eagles ML",
+        "Jets ML"
       ],
-      "risk": "Aggressive",
-      "payout": "+291",
-      "note": "QB mismatch"
-    },
-    {
-      "legs": [
-        "Giants ML",
-        "Cowboys ML",
-        "Vikings ML"
-      ],
-      "risk": "Aggressive",
-      "payout": "+1198",
-      "note": "Division rivalry"
+      "risk": "Safe",
+      "payout": "+254",
+      "note": "Strong home trends"
     }
   ],
-  "generated_at": "2025-06-03 16:10:33.442237"
+  "generated_at": "2025-06-03 16:23:09.302354"
 }

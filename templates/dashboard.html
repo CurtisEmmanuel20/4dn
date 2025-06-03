@@ -5,7 +5,6 @@
     background: linear-gradient(120deg, #23272f 60%, #00bfff22 100%);
     border-radius: 1.25rem;
     box-shadow: 0 4px 32px 0 rgba(0,255,153,0.10), 0 1.5px 8px 0 rgba(0,191,255,0.10);
-    border: 1.5px solid #00bfff80;
     color: #f5f6fa;
     transition: box-shadow 0.2s, transform 0.15s;
     padding: 2.2rem 1.2rem 1.5rem 1.2rem;
@@ -66,8 +65,8 @@
     <!-- Stat Cards -->
     <div class="col-12 col-md-4">
       <div class="stat-card text-center">
-        <div class="stat-title"><span style="font-size:1.2rem;vertical-align:middle;">📅</span> Season Weeks Left</div>
-        <div class="stat-value">{{ weeks_left }}</div>
+        <div class="stat-title"><span style="font-size:1.2rem;vertical-align:middle;">📅</span> {{ countdown_label }}</div>
+        <div class="stat-value">{{ countdown_value }}</div>
         <div class="stat-sub">NFL Regular Season</div>
       </div>
     </div>

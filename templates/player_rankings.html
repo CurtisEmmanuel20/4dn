@@ -40,60 +40,54 @@
       <button type="submit" class="btn btn-primary">Filter</button>
     </div>
   </form>
-  <div class="table-responsive">
-    <table class="table table-striped table-hover table-bordered">
-      <thead class="thead-dark">
-        <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Team</th>
-          <th>Pos</th>
-          <th>Proj Pts</th>
-          <th>Consistency</th>
-          <th>Weather</th>
-          <th>Red Zone</th>
-          <th>Explosiveness</th>
-          <th>Target Quality</th>
-          <th>O-Line Grade</th>
-          <th>QB Stability</th>
-          <th>Readiness</th>
-          <th>Matchup</th>
-          <th>Clutch</th>
-          <th>Health</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for player in data %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ player['Name'] }}</td>
-            <td>{{ player['Team'] }}</td>
-            <td>{{ player['Position'] }}</td>
-            <td>{{ player['ProjectedPoints'] }}</td>
-            <td>{{ player['Consistency'] }}</td>
-            <td>{{ player['WeatherProfile'] }}</td>
-            <td>{{ player['RedZoneShare'] }}</td>
-            <td>{{ player['ExplosivePlays'] }}</td>
-            <td>{{ player['TargetQuality'] }}</td>
-            <td>{{ player['OlineGrade'] }}</td>
-            <td>{{ player['QBStability'] }}</td>
-            <td>{{ player['PlayerReadiness'] }}</td>
-            <td>{{ player['MatchupGrade'] }}</td>
-            <td>{{ player['ClutchRating'] }}</td>
-            <td>{{ player['DefHealthScore'] }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="scrollable-list" style="max-height: 75vh; overflow-y: auto;">
+    <ul class="list-group list-group-flush">
+      {% for player in data %}
+      <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center py-3 px-2 mb-2" style="background:rgba(30,34,45,0.95); border-radius:1rem; box-shadow:0 2px 12px #00bfff22; border:1.5px solid #00bfff33;">
+        <div class="d-flex align-items-center mb-2 mb-md-0" style="min-width:180px;">
+          <span class="badge bg-primary me-2" style="font-size:1.1rem;min-width:2.5rem;">#{{ loop.index }}</span>
+          <span class="fw-bold" style="font-size:1.15rem;color:#00ff99;">{{ player['Name'] }}</span>
+          <span class="ms-2 badge bg-secondary">{{ player['Position'] }}</span>
+          <span class="ms-2 badge bg-dark">{{ player['Team'] }}</span>
+        </div>
+        <div class="d-flex flex-wrap flex-grow-1 align-items-center ms-md-4" style="gap:1.2rem;">
+          <span><strong>Proj:</strong> <span style="color:#ffe066;">{{ player['ProjectedPoints'] }}</span></span>
+          <span><strong>Cons:</strong> {{ player['Consistency'] }}</span>
+          <span><strong>Weather:</strong> {{ player['WeatherProfile'] }}</span>
+          <span><strong>RZ:</strong> {{ player['RedZoneShare'] }}</span>
+          <span><strong>Expl:</strong> {{ player['ExplosivePlays'] }}</span>
+          <span><strong>TgtQ:</strong> {{ player['TargetQuality'] }}</span>
+          <span><strong>OL:</strong> {{ player['OlineGrade'] }}</span>
+          <span><strong>QB:</strong> {{ player['QBStability'] }}</span>
+          <span><strong>Ready:</strong> {{ player['PlayerReadiness'] }}</span>
+          <span><strong>Matchup:</strong> {{ player['MatchupGrade'] }}</span>
+          <span><strong>Clutch:</strong> {{ player['ClutchRating'] }}</span>
+          <span><strong>Health:</strong> {{ player['DefHealthScore'] }}</span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
   </div>
 </div>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script>
-  $(document).ready(function () {
-    $('.table').DataTable();
-  });
-</script>
+<style>
+.scrollable-list {
+  scrollbar-width: thin;
+  scrollbar-color: #00bfff #23272f;
+}
+.scrollable-list::-webkit-scrollbar {
+  width: 10px;
+  background: #23272f;
+  border-radius: 8px;
+}
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg,#00ff99,#00bfff);
+  border-radius: 8px;
+}
+.list-group-item {
+  background: rgba(30,34,45,0.95) !important;
+  border: none !important;
+  margin-bottom: 0.5rem;
+}
+</style>
 {% endblock %}
 python app.py

@@ -82,7 +82,19 @@ def home():
     """
     Render the dashboard as the landing page (now at '/').
     """
-    weeks_left = 18  # You can make this dynamic later
+    today = datetime.now().date()
+    week_1_date = datetime(2025, 9, 4).date()
+    end_of_season = datetime(2025, 12, 29).date()  # adjust based on actual week 18 end
+
+    if today < week_1_date:
+        countdown_label = "Days Until NFL Kickoff"
+        countdown_value = (week_1_date - today).days
+    else:
+        countdown_label = "Weeks Left in NFL Regular Season"
+        total_weeks = 18
+        weeks_passed = ((today - week_1_date).days) // 7
+        countdown_value = max(total_weeks - weeks_passed, 0)
+
     featured_matchup = {
         'title': 'Featured Matchup of the Week',
         'desc': 'Tyreek Hill (MIA) vs. New England Patriots – Projected for 21.4 PPR points.'
@@ -96,7 +108,8 @@ def home():
     ]
     return render_template(
         'dashboard.html',
-        weeks_left=weeks_left,
+        countdown_label=countdown_label,
+        countdown_value=countdown_value,
         featured_matchup=featured_matchup,
         projections=projections
     )
