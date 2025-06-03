@@ -40,6 +40,18 @@
       <button type="submit" class="btn btn-primary">Filter</button>
     </div>
   </form>
+  <div class="mb-3 d-flex flex-wrap align-items-center" style="gap:1.2rem;">
+    <span class="fw-bold" style="font-size:1.08rem;">Metrics Key</span>
+    <span class="metrics-info position-relative" tabindex="0" style="cursor:pointer;">
+      <i class="bi bi-info-circle-fill text-info" style="font-size:1.2rem;"></i>
+      <span class="metrics-tooltip position-absolute bg-dark text-light p-3 rounded shadow" style="min-width:260px; left:2rem; top:0; z-index:10; display:none; font-size:0.98rem;">
+        <strong>B:</strong> Explosiveness grade (A+ = elite, C = average).<br>
+        <strong>Ready:</strong> Player readiness score (higher = more prepared and healthy).<br>
+        <strong>Matchup:</strong> Matchup grade (A+ = best, F = worst).<br>
+        These metrics reflect a blend of recent performance, opportunity, and opponent difficulty.
+      </span>
+    </span>
+  </div>
   <div class="scrollable-list" style="max-height: 75vh; overflow-y: auto;">
     <ul class="list-group list-group-flush">
       {% for player in data %}
@@ -51,18 +63,54 @@
           <span class="ms-2 badge bg-dark">{{ player['Team'] }}</span>
         </div>
         <div class="d-flex flex-wrap flex-grow-1 align-items-center ms-md-4" style="gap:1.2rem;">
-          <span><strong>Proj:</strong> <span style="color:#ffe066;">{{ player['ProjectedPoints'] }}</span></span>
-          <span><strong>Cons:</strong> {{ player['Consistency'] }}</span>
-          <span><strong>Weather:</strong> {{ player['WeatherProfile'] }}</span>
-          <span><strong>RZ:</strong> {{ player['RedZoneShare'] }}</span>
-          <span><strong>Expl:</strong> {{ player['ExplosivePlays'] }}</span>
-          <span><strong>TgtQ:</strong> {{ player['TargetQuality'] }}</span>
-          <span><strong>OL:</strong> {{ player['OlineGrade'] }}</span>
-          <span><strong>QB:</strong> {{ player['QBStability'] }}</span>
-          <span><strong>Ready:</strong> {{ player['PlayerReadiness'] }}</span>
-          <span><strong>Matchup:</strong> {{ player['MatchupGrade'] }}</span>
-          <span><strong>Clutch:</strong> {{ player['ClutchRating'] }}</span>
-          <span><strong>Health:</strong> {{ player['DefHealthScore'] }}</span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Proj:</strong> <span style="color:#ffe066;">{{ player['ProjectedPoints'] }}</span>
+            <span class="metric-tooltip">Projected fantasy points for the week, based on 4DN's blended model.</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>B:</strong> {{ player['ExplosivePlays'] }}
+            <span class="metric-tooltip">Explosiveness grade: measures big-play ability and breakaway potential (A+ = elite).</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Ready:</strong> {{ player['PlayerReadiness'] }}
+            <span class="metric-tooltip">Readiness score: combines health, practice status, and recent usage to show how prepared a player is.</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Matchup:</strong> {{ player['MatchupGrade'] }}
+            <span class="metric-tooltip">Matchup grade: rates the difficulty of the opponent (A+ = easiest, F = toughest).</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Cons:</strong> {{ player['Consistency'] }}
+            <span class="metric-tooltip">Consistency: how steady a player's weekly production is (High = reliable, Low = volatile).</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Weather:</strong> {{ player['WeatherProfile'] }}
+            <span class="metric-tooltip">4DN analyzes weather consistency. Dome players are favored over those exposed to outdoor volatility.</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>RZ:</strong> {{ player['RedZoneShare'] }}
+            <span class="metric-tooltip">Red Zone Share: percent of team red zone opportunities (higher = more TD upside).</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>TgtQ:</strong> {{ player['TargetQuality'] }}
+            <span class="metric-tooltip">Target Quality: measures accuracy and catchability of passes thrown to the player.</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>OL:</strong> {{ player['OlineGrade'] }}
+            <span class="metric-tooltip">Offensive Line Grade: rates the player's blocking support (A+ = best, F = worst).</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>QB:</strong> {{ player['QBStability'] }}
+            <span class="metric-tooltip">QB Stability: how secure and effective the starting quarterback is for this player.</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Clutch:</strong> {{ player['ClutchRating'] }}
+            <span class="metric-tooltip">Clutch Rating: performance in high-leverage and late-game situations.</span>
+          </span>
+          <span class="metric-hover position-relative" tabindex="0">
+            <strong>Health:</strong> {{ player['DefHealthScore'] }}
+            <span class="metric-tooltip">Defensive Health Score: how healthy the opposing defense is (lower = more favorable for the player).</span>
+          </span>
         </div>
       </li>
       {% endfor %}
@@ -88,6 +136,29 @@
   border: none !important;
   margin-bottom: 0.5rem;
 }
+.metric-hover {
+  position: relative;
+  cursor: pointer;
+}
+.metric-tooltip {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 2.2rem;
+  z-index: 10;
+  min-width: 220px;
+  background: #181c24;
+  color: #f5f6fa;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 12px #00bfff22;
+  padding: 0.7rem 1rem;
+  font-size: 0.97rem;
+  pointer-events: none;
+}
+.metric-hover:hover .metric-tooltip,
+.metric-hover:focus .metric-tooltip {
+  display: block;
+  pointer-events: auto;
+}
 </style>
 {% endblock %}
-python app.py

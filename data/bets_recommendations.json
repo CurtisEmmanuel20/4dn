@@ -1,58 +1,97 @@
 {
   "moneyline_picks": [
     {
-      "team": "Bills",
-      "odds": "-194",
-      "confidence": 82,
-      "note": "Elite defense and home advantage"
+      "team": "Cowboys",
+      "odds": "-245",
+      "confidence": 87,
+      "note": "Strong home trends"
     },
     {
-      "team": "Packers",
-      "odds": "-141",
-      "confidence": 89,
+      "team": "Dolphins",
+      "odds": "-201",
+      "confidence": 86,
+      "note": "Strong home trends"
+    },
+    {
+      "team": "Cowboys",
+      "odds": "-148",
+      "confidence": 73,
       "note": "Division rivalry"
     },
     {
-      "team": "Eagles",
-      "odds": "-240",
+      "team": "Jets",
+      "odds": "-209",
+      "confidence": 72,
+      "note": "Revenge game"
+    },
+    {
+      "team": "Bengals",
+      "odds": "-183",
+      "confidence": 71,
+      "note": "QB mismatch"
+    },
+    {
+      "team": "Bengals",
+      "odds": "-241",
       "confidence": 79,
-      "note": "Elite defense and home advantage"
+      "note": "Mahomes vs bottom-10 defense"
     },
     {
       "team": "Vikings",
-      "odds": "-244",
-      "confidence": 88,
+      "odds": "-204",
+      "confidence": 75,
+      "note": "Elite defense and home advantage"
+    },
+    {
+      "team": "Seahawks",
+      "odds": "-183",
+      "confidence": 61,
       "note": "Strong home trends"
     }
   ],
   "parlay_recommendations": [
     {
       "legs": [
-        "Eagles ML",
-        "49ers ML"
+        "Patriots ML",
+        "Patriots ML",
+        "Rams ML",
+        "Giants ML"
       ],
-      "risk": "Aggressive",
-      "payout": "+484",
+      "risk": "Safe",
+      "payout": "+1005",
       "note": "Hot streak"
     },
     {
       "legs": [
+        "Seahawks ML",
+        "Chiefs ML",
         "Rams ML",
-        "Rams ML"
+        "49ers ML"
       ],
-      "risk": "Aggressive",
-      "payout": "+1083",
-      "note": "Division rivalry"
+      "risk": "Moderate",
+      "payout": "+230",
+      "note": "Underdog with upside"
     },
     {
       "legs": [
-        "Eagles ML",
-        "Jets ML"
+        "49ers ML",
+        "Eagles ML"
       ],
-      "risk": "Safe",
-      "payout": "+254",
-      "note": "Strong home trends"
+      "risk": "Moderate",
+      "payout": "+831",
+      "note": "Injury boost"
+    },
+    {
+      "legs": [
+        "Cowboys ML",
+        "Patriots ML",
+        "Vikings ML",
+        "49ers ML"
+      ],
+      "risk": "Moderate",
+      "payout": "+448",
+      "note": "Hot streak"
     }
   ],
-  "generated_at": "2025-06-03 16:23:09.302354"
+  "generated_at": "2025-06-03 16:30:21.235563"
 }

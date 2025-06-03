@@ -689,10 +689,21 @@ def elite_matchups():
 @app.route('/rankings')
 def player_rankings():
     import pandas as pd
+    position = request.args.get('position', '')
+    team = request.args.get('team', '')
+    consistency = request.args.get('consistency', '')
+    weather = request.args.get('weather', '')
     try:
         df = pd.read_csv("data/fake_player_rankings.csv")
-        print('DEBUG: Loaded player rankings sample:', df.head(2).to_dict())
-        # Convert columns to match template keys if needed
+        # Filtering logic
+        if position:
+            df = df[df['Position'] == position]
+        if team:
+            df = df[df['Team'] == team]
+        if consistency:
+            df = df[df['Consistency'] == consistency]
+        if weather:
+            df = df[df['WeatherProfile'] == weather]
         data = []
         for _, row in df.iterrows():
             data.append({
