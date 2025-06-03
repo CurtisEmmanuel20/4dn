@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <div class="alert alert-info" style="background: linear-gradient(90deg, #00ff99 0%, #00bfff 100%); color: #181c24; border: none; border-radius: 1.2rem; box-shadow: 0 2px 16px 0 #00ffd066; font-size: 1.13rem; font-weight: 500; letter-spacing: 0.2px; padding: 1.2rem 1.5rem; margin-bottom: 2.2rem;">
+    <span style="font-size:1.35rem;vertical-align:middle;">🎯</span>
+    Welcome to the <strong>4DN Daily Fantasy Hub</strong> — built for serious contenders.<br>
+    Our system identifies high-leverage matchups, elite value plays, game environments with elevated scoring potential, and prime-time opportunities worth targeting. Every recommendation is backed by pace metrics, salary efficiency, and historical matchup data to maximize your DFS ROI.
+  </div>
+</div>
+
+<!-- Fourth Down Builder Box -->
+<div class="dfs-glass-card mb-5">
+  <div class="dfs-card-header" style="font-size:1.3rem;"><span style="font-size:1.5rem;">🏆</span> Fourth Down Builder</div>
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <button id="fetch-lineup" class="btn btn-neon" style="background:linear-gradient(90deg,#00ff99,#00bfff);color:#181c24;font-weight:700;">Generate Optimal DFS Lineup</button>
+      <button id="regenerate-lineup" class="btn btn-outline-info" style="font-weight:700;">Regenerate Lineup</button>
+    </div>
+    <div id="lineup-result" class="mt-3"></div>
+  </div>
+</div>
+<script>
+  let heldPlayers = [];
+  function renderLineup(lineup, reasoning) {
+    let html = '<div class="row">';
+    lineup.forEach(player => {
+      const isHeld = heldPlayers.includes(player.name);
+      html += `<div class='col-md-4 mb-3'><div class='card bg-dark text-white dfs-glass-card'><div class='card-body'>` +
+        `<h5 class='card-title' style='color:#00bfff;'>${player.name}` +
+        `<button class='lock-btn${isHeld ? " locked" : ""}' data-player='${player.name}' title='${isHeld ? "Unlock" : "Hold"}'>` +
+        (isHeld ? "<i class='bi bi-lock-fill'></i>" : "<i class='bi bi-unlock'></i>") +
+        `</button></h5>` +
+        `<p class='card-text mb-1'>Position: <span style='color:#00ff99;'>${player.position}</span></p>` +
+        `<p class='card-text mb-1'>Team: <span style='color:#b8c1ec;'>${player.team}</span></p>` +
+        `<p class='card-text'>Projected Points: <strong style='color:#ffe066;'>${player.projected_points}</strong></p>` +
+        `</div></div></div>`;
+    });
+    html += '</div>';
+    html += `<div class='alert alert-info mt-3' style='background:rgba(0,255,153,0.08);color:#00ff99;border:none;'>${reasoning}</div>`;
+    document.getElementById('lineup-result').innerHTML = html;
+    // Add lock button listeners
+    document.querySelectorAll('.lock-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        const player = this.getAttribute('data-player');
+        if (heldPlayers.includes(player)) {
+          heldPlayers = heldPlayers.filter(p => p !== player);
+        } else {
+          heldPlayers.push(player);
+        }
+        // Re-render to update lock state
+        renderLineup(currentLineup, currentReasoning);
+      });
+    });
+  }
+  let currentLineup = [];
+  let currentReasoning = '';
+  function fetchLineup(held=[]) {
+    let url = '/api/dfs-lineup';
+    if (held.length > 0) {
+      url += '?hold=' + encodeURIComponent(held.join(','));
+    }
+    document.getElementById('fetch-lineup').disabled = true;
+    document.getElementById('regenerate-lineup').disabled = true;
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        currentLineup = data.lineup;
+        currentReasoning = data.reasoning;
+        // Remove held players that are no longer in the lineup
+        heldPlayers = heldPlayers.filter(p => currentLineup.some(pl => pl.name === p));
+        renderLineup(currentLineup, currentReasoning);
+        document.getElementById('fetch-lineup').disabled = false;
+        document.getElementById('regenerate-lineup').disabled = false;
+      })
+      .catch(() => {
+        document.getElementById('lineup-result').innerHTML = '<div class="alert alert-danger">Error fetching lineup.</div>';
+        document.getElementById('fetch-lineup').disabled = false;
+        document.getElementById('regenerate-lineup').disabled = false;
+      });
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('fetch-lineup').addEventListener('click', function() {
+      heldPlayers = [];
+      fetchLineup();
+    });
+    document.getElementById('regenerate-lineup').addEventListener('click', function() {
+      // Shuffle the lineup for demo purposes (simulate regeneration)
+      fetch('/api/dfs-lineup')
+        .then(r => r.json())
+        .then(data => {
+          currentLineup = data.lineup.sort(() => Math.random() - 0.5); // shuffle for fake regeneration
+          currentReasoning = data.reasoning + ' (Regenerated)';
+          heldPlayers = heldPlayers.filter(p => currentLineup.some(pl => pl.name === p));
+          renderLineup(currentLineup, currentReasoning);
+        })
+        .catch(() => {
+          document.getElementById('lineup-result').innerHTML = '<div class="alert alert-danger">Error fetching lineup.</div>';
+        });
+    });
+    // Initial load
+    fetchLineup();
+  });
+</script>
+
+<!-- DFS Insights Cards -->
+<h3 class="mt-5" style="color:#00bfff;letter-spacing:1px;">DFS Insights</h3>
+<div class="row">
+  <!-- Salary Exploits -->
+  <div class="col-md-6 col-lg-3">
+    <div class="dfs-glass-card">
+      <div class="dfs-card-header bg-warning"><span style="font-size:1.5rem;">💸</span> Salary Exploits</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for player in dfs_insights.salary_exploits %}
+            <li class="dfs-list-group-item">
+              <strong>{{ player.player }}</strong> ({{ player.position }}) – {{ player.salary }}<br>
+              <small>{{ player.note }}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Stack Recommendations -->
+  <div class="col-md-6 col-lg-3">
+    <div class="dfs-glass-card">
+      <div class="dfs-card-header bg-primary"><span style="font-size:1.5rem;">🧱</span> Stack Recommendations</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for stack in dfs_insights.stack_recommendations %}
+            <li class="dfs-list-group-item">
+              <strong>{{ stack.combo }}</strong><br>
+              <small>{{ stack.note }}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Defenses to Target -->
+  <div class="col-md-6 col-lg-3">
+    <div class="dfs-glass-card">
+      <div class="dfs-card-header bg-danger"><span style="font-size:1.5rem;">🎯</span> Defenses to Target</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for def in dfs_insights.defenses_to_target %}
+            <li class="dfs-list-group-item">
+              <strong>{{ def.defense }}</strong><br>
+              <small>{{ def.note }}</small>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Boom/Bust Candidates -->
+  <div class="col-md-6 col-lg-3">
+    <div class="dfs-glass-card">
+      <div class="dfs-card-header bg-dark"><span style="font-size:1.5rem;">⚡</span> Boom/Bust Candidates</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for bb in dfs_insights.boom_bust_candidates %}
+            <li class="dfs-list-group-item">
+              <strong>{{ bb.player }}</strong> ({{ bb.position }})<br>
+              <span class="text-success">Boom: {{ bb.boom }}</span><br>
+              <span class="text-danger">Bust: {{ bb.bust }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Value Plays of the Week -->
+<h3 class="mt-5 mb-3" style="color:#00ff99;letter-spacing:1px;">💎 Value Plays of the Week</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Tyler Boyd – WR – $4,800 vs CLE</h5>
+        <p class="card-text">Expected bump in usage with Higgins out. Facing a defense allowing the 5th-most points to slot receivers.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Roschon Johnson – RB – $4,200 vs GB</h5>
+        <p class="card-text">Should see increased snaps with Foreman sidelined. Packers have allowed 4.9 YPC to RBs this season.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Juwan Johnson – TE – $3,100 vs ATL</h5>
+        <p class="card-text">Red zone target leader for the Saints. Atlanta ranks 28th vs TEs in fantasy points allowed.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- High-Scoring Matchups & Game Pace -->
+<h3 class="mt-5 mb-3" style="color:#00bfff;letter-spacing:1px;">⚡ High-Scoring Matchups & Game Pace</h3>
+<div class="table-responsive mb-4">
+  <table class="table table-dark table-striped table-hover align-middle" style="border-radius:1rem;overflow:hidden;">
+    <thead style="background:linear-gradient(90deg,#00ff99,#00bfff);color:#181c24;">
+      <tr>
+        <th>Matchup</th>
+        <th>Projected Total</th>
+        <th>Pace</th>
+        <th>Avg Def Rank</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>BUF vs KC</td>
+        <td>53.5</td>
+        <td>6.8s/play</td>
+        <td>20.4</td>
+      </tr>
+      <tr>
+        <td>PHI vs DAL</td>
+        <td>51.0</td>
+        <td>7.1s/play</td>
+        <td>18.7</td>
+      </tr>
+      <tr>
+        <td>MIA vs LAC</td>
+        <td>50.5</td>
+        <td>6.5s/play</td>
+        <td>22.1</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Late-Slate Gems – SNF Spotlight -->
+<h3 class="mt-5 mb-3" style="color:#ffe066;letter-spacing:1px;">🌙 Late-Slate Gems – SNF Spotlight</h3>
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Javonte Williams – RB – DEN</h5>
+        <p class="card-text">Projected 13.7 pts vs MIN – Should dominate touches in high-paced primetime game.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Courtland Sutton – WR – DEN</h5>
+        <p class="card-text">Projected 12.1 pts vs MIN – Red zone favorite, strong TD upside in SNF.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">T.J. Hockenson – TE – MIN</h5>
+        <p class="card-text">Projected 14.3 pts @ DEN – Should see double-digit targets in a likely shootout.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Russell Wilson – QB – DEN</h5>
+        <p class="card-text">Projected 18.2 pts vs MIN – Dual-threat upside, faces a defense allowing big plays.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Jordan Addison – WR – MIN</h5>
+        <p class="card-text">Projected 11.8 pts @ DEN – Deep threat with big-play potential in a fast-paced game.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card h-100 shadow dfs-glass-card">
+      <div class="card-body">
+        <h5 class="card-title" style="color:#00bfff;">Alexander Mattison – RB – MIN</h5>
+        <p class="card-text">Projected 10.9 pts @ DEN – Should get goal-line work and 15+ touches in SNF.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

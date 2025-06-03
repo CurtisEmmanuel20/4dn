@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .elite-card {
+    background: linear-gradient(135deg, #23272f 60%, #00bfff22 100%);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 32px 0 rgba(0,255,153,0.10), 0 1.5px 8px 0 rgba(0,191,255,0.10);
+    border: 1.5px solid #00bfff80;
+    color: #f5f6fa;
+    transition: box-shadow 0.2s, transform 0.15s;
+    padding: 1.5rem 1.2rem;
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .elite-card:hover {
+    box-shadow: 0 8px 40px 0 #00ff99cc, 0 2px 12px 0 #00bfffcc;
+    transform: translateY(-6px) scale(1.03);
+  }
+  .elite-card .card-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #00bfff;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+  .elite-card .badge {
+    font-size: 0.95rem;
+    margin-left: 0.5rem;
+    background: linear-gradient(90deg, #00ff99 0%, #00bfff 100%);
+    color: #181c24;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.3em 0.8em;
+  }
+  .elite-card ul {
+    padding-left: 0;
+    margin-bottom: 0.7rem;
+  }
+  .elite-card li {
+    list-style: none;
+    margin-bottom: 0.3rem;
+    font-size: 1.05rem;
+    color: #b8c1ec;
+  }
+  .elite-card .ai-blurb {
+    font-size: 1.05rem;
+    color: #ffe066;
+    margin-top: 0.7rem;
+    font-style: italic;
+  }
+</style>
+<div class="container mt-4">
+  <div class="alert alert-info" style="background: linear-gradient(90deg, #00ff99 0%, #00bfff 100%); color: #181c24; border: none; border-radius: 1.2rem; box-shadow: 0 2px 16px 0 #00ffd066; font-size: 1.13rem; font-weight: 500; letter-spacing: 0.2px; padding: 1.2rem 1.5rem; margin-bottom: 2.2rem;">
+    <span style="font-size:1.35rem;vertical-align:middle;">🚀</span>
+    At <strong>Fourth Down & Numbers (4DN)</strong>, our <strong>Elite Matchup Tracker</strong> highlights players with the most favorable weekly conditions using a custom algorithm. We weigh factors like positional matchup strength, snap share trends, red zone usage, opponent injuries, and weather conditions. <strong>Only players showing strong momentum across multiple indicators are featured.</strong>
+  </div>
+  <h3 class="mb-4" style="color:#00bfff;letter-spacing:1px;">🔥 Elite Matchups of the Week</h3>
+  <div class="row">
+    {% for player in players %}
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="elite-card">
+        <div>
+          <div class="d-flex align-items-center mb-2">
+            <span class="card-title">{{ player.name }}</span>
+            <span class="badge">{{ player.position }}</span>
+            <span class="ms-auto" style="font-size:1.2rem;color:#00ff99;">{{ player.team }}</span>
+          </div>
+          <div style="font-size:1.05rem;">
+            <strong>Matchup:</strong> <span style="color:#00ff99;">{{ player.matchup }}</span>
+          </div>
+          <ul class="mt-2">
+            <li>📊 <b>Opp. Rank:</b> <span style="color:#ffe066;">{{ player.def_rank }}</span> vs {{ player.position }}</li>
+            <li>🏥 <b>Status:</b> <span style="color:#00ff99;">{{ player.status }}</span></li>
+            <li>🔥 <b>RZ Looks:</b> {{ player.red_zone_looks }}</li>
+            <li>📈 <b>Snaps:</b> {{ player.snap_trend|join(', ') }}</li>
+            <li>🌦️ <b>Weather:</b> {{ player.weather }}</li>
+          </ul>
+        </div>
+        <div class="ai-blurb">{{ player.ai_blurb }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

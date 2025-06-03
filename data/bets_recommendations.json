@@ -1,0 +1,78 @@
+{
+  "moneyline_picks": [
+    {
+      "team": "Cowboys",
+      "odds": "-200",
+      "confidence": 81,
+      "note": "Elite defense and home advantage"
+    },
+    {
+      "team": "Rams",
+      "odds": "-151",
+      "confidence": 72,
+      "note": "QB mismatch"
+    },
+    {
+      "team": "Packers",
+      "odds": "-130",
+      "confidence": 62,
+      "note": "Injury boost"
+    },
+    {
+      "team": "Seahawks",
+      "odds": "-140",
+      "confidence": 72,
+      "note": "Strong home trends"
+    },
+    {
+      "team": "Giants",
+      "odds": "-198",
+      "confidence": 83,
+      "note": "Revenge game"
+    },
+    {
+      "team": "Cowboys",
+      "odds": "-112",
+      "confidence": 75,
+      "note": "Strong home trends"
+    },
+    {
+      "team": "Seahawks",
+      "odds": "-128",
+      "confidence": 82,
+      "note": "Division rivalry"
+    }
+  ],
+  "parlay_recommendations": [
+    {
+      "legs": [
+        "Rams ML",
+        "Giants ML"
+      ],
+      "risk": "Aggressive",
+      "payout": "+1049",
+      "note": "Division rivalry"
+    },
+    {
+      "legs": [
+        "Jets ML",
+        "Patriots ML",
+        "Chiefs ML"
+      ],
+      "risk": "Aggressive",
+      "payout": "+291",
+      "note": "QB mismatch"
+    },
+    {
+      "legs": [
+        "Giants ML",
+        "Cowboys ML",
+        "Vikings ML"
+      ],
+      "risk": "Aggressive",
+      "payout": "+1198",
+      "note": "Division rivalry"
+    }
+  ],
+  "generated_at": "2025-06-03 16:10:33.442237"
+}

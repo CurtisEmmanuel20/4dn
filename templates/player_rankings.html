@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center mb-3">📋 Fantasy Player Rankings – Draft Cheat Sheet</h2>
+  <form method="GET" class="row mb-4">
+    <div class="col-md-3">
+      <select name="position" class="form-control">
+        <option value="">All Positions</option>
+        <option value="QB">QB</option>
+        <option value="RB">RB</option>
+        <option value="WR">WR</option>
+        <option value="TE">TE</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="team" class="form-control">
+        <option value="">All Teams</option>
+        {% for player in data %}
+          <option value="{{ player['Team'] }}">{{ player['Team'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="consistency" class="form-control">
+        <option value="">Consistency</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="weather" class="form-control">
+        <option value="">Weather Profile</option>
+        <option value="Dome">Dome</option>
+        <option value="Outdoor">Outdoor</option>
+        <option value="Volatile">Volatile</option>
+      </select>
+    </div>
+    <div class="col-12 mt-2 text-center">
+      <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+  </form>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover table-bordered">
+      <thead class="thead-dark">
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Team</th>
+          <th>Pos</th>
+          <th>Proj Pts</th>
+          <th>Consistency</th>
+          <th>Weather</th>
+          <th>Red Zone</th>
+          <th>Explosiveness</th>
+          <th>Target Quality</th>
+          <th>O-Line Grade</th>
+          <th>QB Stability</th>
+          <th>Readiness</th>
+          <th>Matchup</th>
+          <th>Clutch</th>
+          <th>Health</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in data %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ player['Name'] }}</td>
+            <td>{{ player['Team'] }}</td>
+            <td>{{ player['Position'] }}</td>
+            <td>{{ player['ProjectedPoints'] }}</td>
+            <td>{{ player['Consistency'] }}</td>
+            <td>{{ player['WeatherProfile'] }}</td>
+            <td>{{ player['RedZoneShare'] }}</td>
+            <td>{{ player['ExplosivePlays'] }}</td>
+            <td>{{ player['TargetQuality'] }}</td>
+            <td>{{ player['OlineGrade'] }}</td>
+            <td>{{ player['QBStability'] }}</td>
+            <td>{{ player['PlayerReadiness'] }}</td>
+            <td>{{ player['MatchupGrade'] }}</td>
+            <td>{{ player['ClutchRating'] }}</td>
+            <td>{{ player['DefHealthScore'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $('.table').DataTable();
+  });
+</script>
+{% endblock %}
+python app.py

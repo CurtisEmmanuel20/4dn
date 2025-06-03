@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">📊 Sharp Bets of the Day</h2>
+  <p class="text-muted">Smart picks updated daily — Moneyline locks and high-upside parlays.</p>
+
+  <!-- 💰 Moneyline Picks -->
+  <div class="card mb-4 shadow-sm border-left-success">
+    <div class="card-header bg-gradient-success text-white">
+      <h5 class="mb-0">💰 Top Moneyline Picks</h5>
+    </div>
+    <div class="card-body">
+      {% for pick in bets_data.moneyline_picks %}
+        <div class="mb-3">
+          <strong>{{ pick.team }}</strong> – Odds: <span class="text-primary">{{ pick.odds }}</span>  
+          | Confidence: <span class="badge badge-success">{{ pick.confidence }}%</span><br>
+          <small class="text-muted">{{ pick.note }}</small>
+        </div>
+        {% if not loop.last %}<hr>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 🎯 Parlay Recommendations -->
+  <div class="card shadow-sm border-left-info">
+    <div class="card-header bg-gradient-info text-white">
+      <h5 class="mb-0">🎯 Parlay Combos</h5>
+    </div>
+    <div class="card-body">
+      {% for parlay in bets_data.parlay_recommendations %}
+        <div class="mb-3">
+          <strong>Legs:</strong> {{ parlay.legs | join(', ') }}<br>
+          <strong>Risk:</strong> <span class="badge badge-warning">{{ parlay.risk }}</span> &nbsp;
+          <strong>Payout:</strong> <span class="text-info">{{ parlay.payout }}</span><br>
+          <small class="text-muted">{{ parlay.note }}</small>
+        </div>
+        {% if not loop.last %}<hr>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <p class="text-muted small mt-4">Last updated: {{ bets_data.generated_at }}</p>
+</div>
+{% endblock %}

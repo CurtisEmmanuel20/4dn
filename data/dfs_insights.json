@@ -1,0 +1,18 @@
+{
+  "salary_exploits": [
+    {"player": "Tony Pollard", "position": "RB", "salary": "$5,600", "note": "High usage, low price vs weak run D"},
+    {"player": "Zay Flowers", "position": "WR", "salary": "$4,900", "note": "Undervalued volume receiver"}
+  ],
+  "stack_recommendations": [
+    {"combo": "Josh Allen + Stefon Diggs", "note": "Favorable game script and high ceiling stack"},
+    {"combo": "Tua Tagovailoa + Tyreek Hill", "note": "Facing a weak secondary with shootout potential"}
+  ],
+  "defenses_to_target": [
+    {"defense": "Chicago Bears", "note": "Struggles vs WRs and TEs"},
+    {"defense": "Arizona Cardinals", "note": "Giving up most points to RBs"}
+  ],
+  "boom_bust_candidates": [
+    {"player": "George Pickens", "position": "WR", "boom": "100+ yd ceiling", "bust": "low catch %, poor QB play"},
+    {"player": "Kadarius Toney", "position": "WR", "boom": "High YAC upside", "bust": "Snap count risk"}
+  ]
+}

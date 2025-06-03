@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  .stat-card {
+    background: linear-gradient(120deg, #23272f 60%, #00bfff22 100%);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 32px 0 rgba(0,255,153,0.10), 0 1.5px 8px 0 rgba(0,191,255,0.10);
+    border: 1.5px solid #00bfff80;
+    color: #f5f6fa;
+    transition: box-shadow 0.2s, transform 0.15s;
+    padding: 2.2rem 1.2rem 1.5rem 1.2rem;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card .stat-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #00ff99;
+    letter-spacing: 1px;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+  }
+  .stat-card .stat-value {
+    font-size: 2.3rem;
+    font-weight: 800;
+    color: #ffe066;
+    margin-bottom: 0.2rem;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px #00ffd0a0;
+  }
+  .stat-card .stat-sub {
+    font-size: 1.05rem;
+    color: #b8c1ec;
+    margin-top: 0.2rem;
+    font-weight: 500;
+  }
+  .stat-card .start {
+    color: #00ff99;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #00ff99 0%, #00bfff 100%);
+    padding: 0.2em 0.8em;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 8px #00ffd0a0;
+  }
+  .stat-card .sit {
+    color: #ff416c;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #ffe066 0%, #ff416c 100%);
+    padding: 0.2em 0.8em;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 8px #ff416c80;
+  }
+</style>
+<div class="container-fluid py-4">
+  <div class="row g-4">
+    <!-- Stat Cards -->
+    <div class="col-12 col-md-4">
+      <div class="stat-card text-center">
+        <div class="stat-title"><span style="font-size:1.2rem;vertical-align:middle;">📅</span> Season Weeks Left</div>
+        <div class="stat-value">{{ weeks_left }}</div>
+        <div class="stat-sub">NFL Regular Season</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="stat-card text-center">
+        <div class="stat-title"><span style="font-size:1.2rem;vertical-align:middle;">🔥</span> Featured Matchup</div>
+        <div class="stat-value" style="font-size:1.25rem;color:#00bfff;font-weight:700;">{{ featured_matchup.title }}</div>
+        <div class="stat-sub" style="color:#ffe066;font-size:1.08rem;">{{ featured_matchup.desc }}</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="stat-card text-center">
+        <div class="stat-title"><span style="font-size:1.2rem;vertical-align:middle;">🔒</span> Your Season Pass</div>
+        <div class="stat-value">
+          {% if session.get('season_pass') %}
+            <span class="start">Active</span>
+          {% else %}
+            <span class="sit">Inactive</span>
+          {% endif %}
+        </div>
+        <div class="stat-sub">Unlocks all features</div>
+      </div>
+    </div>
+  </div>
+  <!-- Projections Table -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="d-flex flex-wrap align-items-center mb-3">
+        <h3 class="fw-bold me-3 mb-0">Weekly Projections</h3>
+        <select id="position-select" class="form-select w-auto me-2" style="min-width:120px;">
+          <option value="QB">QB</option>
+          <option value="RB">RB</option>
+          <option value="WR">WR</option>
+          <option value="TE">TE</option>
+          <option value="K">K</option>
+          <option value="DST">DST</option>
+        </select>
+        <span id="projections-loading" class="ms-2 text-accent" style="display:none;">Loading...</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle" id="projections-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th></th>
+              <th>Name</th>
+              <th>Team</th>
+              <th>Opponent</th>
+              <th>Projected</th>
+              <th>Boom/Bust</th>
+              <th>Start/Sit</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- AI Chat Assistant -->
+  <div class="row mt-5" id="chat">
+    <div class="col-12 col-lg-8 mx-auto">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Fantasy Assistant AI Chat</h4>
+          <div id="chat-log" class="bg-dark rounded p-3 mb-3" style="height: 220px; max-height: 220px; overflow-y: auto;"></div>
+          <div class="input-group mb-2">
+            <textarea id="chat-input" class="form-control" placeholder="Type your fantasy football question..." rows="2"></textarea>
+            <button id="chat-submit" class="btn btn-accent" type="button">Ask 4DN</button>
+          </div>
+          <small class="text-muted d-block mt-2">Start/Sit, trade, and matchup advice powered by GPT-4o and real stats.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const positionSelect = document.getElementById('position-select');
+const projectionsTable = document.getElementById('projections-table').querySelector('tbody');
+const loadingMsg = document.getElementById('projections-loading');
+function setPositionSelection(pos) {
+  positionSelect.value = pos;
+  localStorage.setItem('4dn_position', pos);
+}
+function getPositionSelection() {
+  return localStorage.getItem('4dn_position') || 'QB';
+}
+async function loadProjections(position) {
+  loadingMsg.style.display = 'inline';
+  projectionsTable.innerHTML = '';
+  try {
+    const res = await fetch(`/api/projections?position=${position}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      projectionsTable.innerHTML = `<tr><td colspan="8" class="text-danger">${data.error || 'Error loading projections.'}</td></tr>`;
+      loadingMsg.style.display = 'none';
+      return;
+    }
+    data.forEach((p, i) => {
+      const highlight = i === 0 ? 'table-success fw-bold' : '';
+      const img = p.img_url ? `<img src='${p.img_url}' class='player-img' alt='${p.player||p.name||''}'>` : `<span class='player-img' style='background:#23262f;display:inline-block;'></span>`;
+      const boom = p.boom ? `<span class='boom'>${p.boom}</span>` : '';
+      const bust = p.bust ? `<span class='bust'>${p.bust}</span>` : '';
+      const boomBust = boom || bust ? `${boom} ${bust}` : '-';
+      const startSit = p.start ? `<span class='start'>Start</span>` : (p.sit ? `<span class='sit'>Sit</span>` : '-');
+      projectionsTable.innerHTML += `
+        <tr class="${highlight}">
+          <td>${i+1}</td>
+          <td>${img}</td>
+          <td>${p.player || p.name || p.Player || ''}</td>
+          <td>${p.team || p.Team || ''}</td>
+          <td>${p.matchup || p.Opponent || ''}</td>
+          <td>${p.projected_points || p['Projected Points'] || p.points || ''}</td>
+          <td>${boomBust}</td>
+          <td>${startSit}</td>
+        </tr>`;
+    });
+    if (data.length === 0) {
+      projectionsTable.innerHTML = '<tr><td colspan="8">No data available.</td></tr>';
+    }
+  } catch (e) {
+    projectionsTable.innerHTML = `<tr><td colspan="8" class="text-danger">Failed to load projections.</td></tr>`;
+  }
+  loadingMsg.style.display = 'none';
+}
+const initialPos = getPositionSelection();
+setPositionSelection(initialPos);
+loadProjections(initialPos);
+positionSelect.addEventListener('change', () => {
+  const pos = positionSelect.value;
+  setPositionSelection(pos);
+  loadProjections(pos);
+});
+document.getElementById("chat-submit").addEventListener("click", async () => {
+  const input = document.getElementById("chat-input").value;
+  const chatLog = document.getElementById("chat-log");
+  if (!input) return;
+  chatLog.innerHTML += `<div><strong>You:</strong> ${input}</div>`;
+  document.getElementById("chat-input").value = "";
+  const response = await fetch("/api/fantasy-chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: input })
+  });
+  const data = await response.json();
+  chatLog.innerHTML += `<div><strong>4DN:</strong> ${data.response ? data.response : (data.error || 'Sorry, something went wrong.')}</div>`;
+  chatLog.scrollTop = chatLog.scrollHeight;
+});
+</script>
+{% endblock %}

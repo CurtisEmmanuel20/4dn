@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="text-neon mb-4">Player & Roster Comparison Tool</h2>
+  <ul class="nav nav-tabs mb-4" id="compareTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab">Single Player</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="roster-tab" data-bs-toggle="tab" data-bs-target="#roster" type="button" role="tab">Full Roster</button>
+    </li>
+  </ul>
+  <div class="tab-content" id="compareTabContent">
+    <div class="tab-pane fade show active" id="single" role="tabpanel">
+      <form method="POST" class="row g-3 align-items-end mb-4">
+        <div class="col-md-5">
+          <label for="player1" class="form-label text-white">Player 1</label>
+          <input list="players" name="player1" id="player1" class="form-control bg-dark text-neon" required autocomplete="off">
+        </div>
+        <div class="col-md-5">
+          <label for="player2" class="form-label text-white">Player 2</label>
+          <input list="players" name="player2" id="player2" class="form-control bg-dark text-neon" required autocomplete="off">
+        </div>
+        <datalist id="players">
+          {% for name in player_names %}
+            <option value="{{ name }}">
+          {% endfor %}
+        </datalist>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-lg btn-success w-100">Compare</button>
+        </div>
+      </form>
+    </div>
+    <div class="tab-pane fade" id="roster" role="tabpanel">
+      <form method="POST" class="mb-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <h5 class="text-neon">Roster 1</h5>
+            {% for slot, pos in roster_slots %}
+              <div class="mb-2">
+                <label class="form-label text-white">{{ slot }}{% if slot == 'SUPERFLEX' %} <span class="badge bg-info">QB/RB/WR/TE</span>{% endif %}</label>
+                <input list="players" name="roster1-{{ slot }}" class="form-control bg-dark text-neon" placeholder="Select {{ pos }}" autocomplete="off">
+              </div>
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            <h5 class="text-neon">Roster 2</h5>
+            {% for slot, pos in roster_slots %}
+              <div class="mb-2">
+                <label class="form-label text-white">{{ slot }}{% if slot == 'SUPERFLEX' %} <span class="badge bg-info">QB/RB/WR/TE</span>{% endif %}</label>
+                <input list="players" name="roster2-{{ slot }}" class="form-control bg-dark text-neon" placeholder="Select {{ pos }}" autocomplete="off">
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <datalist id="players">
+          {% for name in player_names %}
+            <option value="{{ name }}">
+          {% endfor %}
+        </datalist>
+        <div class="row mt-3">
+          <div class="col-12">
+            <button type="submit" class="btn btn-lg btn-success w-100">Compare Rosters</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if compare_result and compare_result.roster1 %}
+  <div class="row g-4 mt-4">
+    <div class="col-md-5">
+      <div class="card bg-dark neon-border text-white">
+        <div class="card-header text-center fw-bold text-neon">Roster 1</div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            {% for slot, data in compare_result.roster1.items() %}
+              <li class="list-group-item bg-dark text-white">
+                <span class="fw-bold">{{ slot }}:</span> {{ data.name or '-' }}<br>
+                <small>Proj: <span class="text-neon">{{ data.projected_points }}</span> | Matchup: {{ data.matchup }} | Last 3 Avg: {{ data.last3_avg }}</small>
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="mt-3 text-neon fw-bold">Total Projected: {{ compare_result.total1 }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 d-flex align-items-center justify-content-center">
+      <span class="display-4 text-neon">VS</span>
+    </div>
+    <div class="col-md-5">
+      <div class="card bg-dark neon-border text-white">
+        <div class="card-header text-center fw-bold text-neon">Roster 2</div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            {% for slot, data in compare_result.roster2.items() %}
+              <li class="list-group-item bg-dark text-white">
+                <span class="fw-bold">{{ slot }}:</span> {{ data.name or '-' }}<br>
+                <small>Proj: <span class="text-neon">{{ data.projected_points }}</span> | Matchup: {{ data.matchup }} | Last 3 Avg: {{ data.last3_avg }}</small>
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="mt-3 text-neon fw-bold">Total Projected: {{ compare_result.total2 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if ai_recommendation %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card bg-dark neon-border text-white">
+        <div class="card-header text-neon fw-bold">AI Recommendation</div>
+        <div class="card-body">
+          <p class="mb-0">{{ ai_recommendation }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% elif compare_result and compare_result.player1 %}
+  <div class="row g-4">
+    <div class="col-md-5">
+      <div class="card bg-dark neon-border text-white">
+        <div class="card-header text-center fw-bold text-neon">{{ compare_result.player1.name }} <span class="text-muted">({{ compare_result.player1.position }})</span></div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark text-white">Projected Points: <span class="fw-bold text-neon">{{ compare_result.player1.projected_points }}</span></li>
+            <li class="list-group-item bg-dark text-white">Matchup: <span class="fw-bold">{{ compare_result.player1.matchup }}</span></li>
+            <li class="list-group-item bg-dark text-white">Last 3 Avg: <span class="fw-bold">{{ compare_result.player1.last3_avg }}</span></li>
+            <li class="list-group-item bg-dark text-white">Position Rank: <span class="fw-bold">{{ compare_result.player1.rank }}</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2 d-flex align-items-center justify-content-center">
+      <span class="display-4 text-neon">VS</span>
+    </div>
+    <div class="col-md-5">
+      <div class="card bg-dark neon-border text-white">
+        <div class="card-header text-center fw-bold text-neon">{{ compare_result.player2.name }} <span class="text-muted">({{ compare_result.player2.position }})</span></div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark text-white">Projected Points: <span class="fw-bold text-neon">{{ compare_result.player2.projected_points }}</span></li>
+            <li class="list-group-item bg-dark text-white">Matchup: <span class="fw-bold">{{ compare_result.player2.matchup }}</span></li>
+            <li class="list-group-item bg-dark text-white">Last 3 Avg: <span class="fw-bold">{{ compare_result.player2.last3_avg }}</span></li>
+            <li class="list-group-item bg-dark text-white">Position Rank: <span class="fw-bold">{{ compare_result.player2.rank }}</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if ai_recommendation %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card bg-dark neon-border text-white">
+        <div class="card-header text-neon fw-bold">AI Recommendation</div>
+        <div class="card-body">
+          <p class="mb-0">{{ ai_recommendation }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+<style>
+.text-neon { color: #00ff99; }
+.neon-border { border: 2px solid #00ff99 !important; box-shadow: 0 0 10px #00ff9944; }
+</style>

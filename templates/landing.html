@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-12 col-lg-6 mb-4 mb-lg-0">
+            <h1 class="display-3 fw-bold" style="color:#00ff99;">Welcome to 4DN Fantasy Football</h1>
+            <p class="lead text-white mb-4">The most advanced, AI-powered fantasy football analytics platform. Get real-time projections, start/sit advice, and more — all free, no login required.</p>
+            <ul class="list-unstyled mb-4">
+                <li class="mb-2"><i class="bi bi-bar-chart-fill text-info me-2"></i> Stat-focused dashboard with modular cards</li>
+                <li class="mb-2"><i class="bi bi-moon-stars-fill text-warning me-2"></i> Dark sports theme with vibrant accents</li>
+                <li class="mb-2"><i class="bi bi-robot text-success me-2"></i> AI-powered fantasy chat assistant</li>
+                <li class="mb-2"><i class="bi bi-person-circle text-primary me-2"></i> Circular player images & boom/bust indicators</li>
+                <li class="mb-2"><i class="bi bi-funnel-fill text-danger me-2"></i> Position & team filters, weekly sliders</li>
+            </ul>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-lg btn-success shadow" style="font-weight:700;letter-spacing:1px;">Launch Dashboard</a>
+        </div>
+        <div class="col-12 col-lg-6 text-center">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Fantasy Football" class="img-fluid rounded shadow-lg" style="max-height:350px;object-fit:cover;border:4px solid #00ff99;">
+        </div>
+    </div>
+</div>
+
+<!-- Trending Player Heatmap Section -->
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+      <h4 class="mb-0">🔥 Trending Player Heatmap</h4>
+      <small class="text-muted">Week-over-week projection changes</small>
+    </div>
+    <div class="card-body">
+      <div id="heatmap-loading" class="text-center">Loading...</div>
+      <div id="heatmap-content" style="display: none;">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="text-success">📈 Top 5 Risers</h5>
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr><th>Player</th><th>Pos</th><th>Change</th></tr>
+              </thead>
+              <tbody id="risers-table"></tbody>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h5 class="text-danger">📉 Top 5 Fallers</h5>
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr><th>Player</th><th>Pos</th><th>Change</th></tr>
+              </thead>
+              <tbody id="fallers-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section id="trending-heatmap" class="mb-4">
+  <h3 class="text-neon mb-3">Trending Player Heatmap</h3>
+  <div class="row g-3">
+    <!-- Risers -->
+    <div class="col-md-6">
+      <div class="card bg-dark text-white neon-border mb-2">
+        <div class="card-header bg-transparent border-bottom border-neon">
+          <span class="fw-bold text-success">Top 5 Risers</span>
+        </div>
+        <div class="card-body d-flex flex-wrap gap-3 justify-content-start">
+          <!-- FAKE DATA PREVIEW -->
+          <div class="heatmap-tile riser">
+            <div class="player-name">Jaylen Waddle</div>
+            <div class="player-pos">WR</div>
+            <div class="change text-success">+4.2</div>
+          </div>
+          <div class="heatmap-tile riser">
+            <div class="player-name">Bijan Robinson</div>
+            <div class="player-pos">RB</div>
+            <div class="change text-success">+3.8</div>
+          </div>
+          <div class="heatmap-tile riser">
+            <div class="player-name">Jordan Addison</div>
+            <div class="player-pos">WR</div>
+            <div class="change text-success">+3.1</div>
+          </div>
+          <div class="heatmap-tile riser">
+            <div class="player-name">Sam LaPorta</div>
+            <div class="player-pos">TE</div>
+            <div class="change text-success">+2.7</div>
+          </div>
+          <div class="heatmap-tile riser">
+            <div class="player-name">James Cook</div>
+            <div class="player-pos">RB</div>
+            <div class="change text-success">+2.3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fallers -->
+    <div class="col-md-6">
+      <div class="card bg-dark text-white neon-border mb-2">
+        <div class="card-header bg-transparent border-bottom border-neon">
+          <span class="fw-bold text-danger">Top 5 Fallers</span>
+        </div>
+        <div class="card-body d-flex flex-wrap gap-3 justify-content-start">
+          <!-- FAKE DATA PREVIEW -->
+          <div class="heatmap-tile faller">
+            <div class="player-name">Dameon Pierce</div>
+            <div class="player-pos">RB</div>
+            <div class="change text-danger">-3.9</div>
+          </div>
+          <div class="heatmap-tile faller">
+            <div class="player-name">Terry McLaurin</div>
+            <div class="player-pos">WR</div>
+            <div class="change text-danger">-3.2</div>
+          </div>
+          <div class="heatmap-tile faller">
+            <div class="player-name">Dalton Schultz</div>
+            <div class="player-pos">TE</div>
+            <div class="change text-danger">-2.8</div>
+          </div>
+          <div class="heatmap-tile faller">
+            <div class="player-name">Najee Harris</div>
+            <div class="player-pos">RB</div>
+            <div class="change text-danger">-2.5</div>
+          </div>
+          <div class="heatmap-tile faller">
+            <div class="player-name">Gabe Davis</div>
+            <div class="player-pos">WR</div>
+            <div class="change text-danger">-2.1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container my-5">
+  <div class="card shadow-sm neon-border bg-dark text-white">
+    <div class="card-header text-neon fw-bold">
+      <i class="bi bi-people-fill me-2"></i>Player Comparison Tool
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/player-compare" class="row g-3 align-items-end mb-3">
+        <div class="col-md-5">
+          <label for="player1" class="form-label text-white">Player 1</label>
+          <input list="players" name="player1" id="player1" class="form-control bg-dark text-neon" required autocomplete="off">
+        </div>
+        <div class="col-md-5">
+          <label for="player2" class="form-label text-white">Player 2</label>
+          <input list="players" name="player2" id="player2" class="form-control bg-dark text-neon" required autocomplete="off">
+        </div>
+        <datalist id="players">
+          {% for name in player_names %}
+            <option value="{{ name }}">
+          {% endfor %}
+        </datalist>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-lg btn-success w-100">Compare</button>
+        </div>
+      </form>
+      <div class="text-muted small">Full comparison with AI recommendation available on the <a href="/player-compare" class="text-neon">dedicated page</a>.</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+  fetch('/api/trending')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('heatmap-loading').style.display = 'none';
+      document.getElementById('heatmap-content').style.display = 'block';
+      data.risers.forEach(p => {
+        document.getElementById('risers-table').innerHTML += `
+          <tr class="fade-in"><td>${p.name}</td><td>${p.position}</td><td class="text-success">+${p.change}</td></tr>
+        `;
+      });
+      data.fallers.forEach(p => {
+        document.getElementById('fallers-table').innerHTML += `
+          <tr class="fade-in"><td>${p.name}</td><td>${p.position}</td><td class="text-danger">${p.change}</td></tr>
+        `;
+      });
+    })
+    .catch(() => {
+      document.getElementById('heatmap-loading').innerText = "Failed to load trending data.";
+    });
+</script>
+<style>
+  .fade-in {
+    animation: fadein 0.7s ease-in;
+  }
+  @keyframes fadein {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+</style>
+{% endblock %}
