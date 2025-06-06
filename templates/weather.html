@@ -1,0 +1,6 @@
+<h2>Weather for {{ team }}</h2>
+<ul>
+{% for w in weather %}
+  <li>{{ w.time }} – {{ w.temp }}°F, {{ w.weather }}, Wind: {{ w.wind }} mph</li>
+{% endfor %}
+</ul>

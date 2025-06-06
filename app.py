@@ -139,24 +139,24 @@ def projections():
     df = pd.read_csv(csv_path)
     return df.head(10).to_json(orient='records')
 
-# --- Fantasy Chat API Route (Open) ---
+# --- Fantasy Chat API Route (Improved) ---
 @app.route('/api/fantasy-chat', methods=['POST'])
 def fantasy_chat():
     """
-    Fantasy Assistant AI Chat endpoint. Accessible to any user.
-    Accepts JSON: { "message": "..." }
-    Returns: { "response": "..." }
+    Fantasy Assistant AI Chat endpoint. Now supports:
+    - All fantasy football and NFL questions: draft strategy, player/team info, start/sit, trades, injuries, projections, etc.
+    - Uses your algorithmic projections and data as context for more accurate, personalized answers.
+    - Only answers football-related questions (fantasy or NFL).
     """
     data = request.get_json()
     user_message = data.get('message', '').strip() if data else ''
     if not user_message:
         return {"error": "No message provided."}, 400
 
-    # Try to find player names in the message
     import re
     player_stats = []
     found_names = set()
-    # Load all projections into a dict: {player_name: (position, row_dict)}
+    # Load all projections and rankings into a dict: {player_name: (position, row_dict)}
     positions = ['qb', 'rb', 'wr', 'te', 'k', 'dst']
     projections = {}
     for pos in positions:
@@ -170,7 +170,7 @@ def fantasy_chat():
                         projections[name.lower()] = (pos.upper(), row)
             except Exception:
                 continue
-    # Find capitalized word pairs (simple player name heuristic)
+    # Try to find player names in the message
     possible_names = re.findall(r'([A-Z][a-z]+\s+[A-Z][a-z]+)', user_message)
     for pname in possible_names:
         key = pname.lower()
@@ -182,11 +182,35 @@ def fantasy_chat():
             opp = row.get('matchup') or row.get('Opponent') or ''
             summary = f"{pname} ({pos}) is projected for {pts} points for {team} vs {opp}. "
             player_stats.append(summary)
-    # System prompt for GPT-4o
+
+    # Add algorithmic context: load top 10 from Big Board and trending players
+    big_board = []
+    try:
+        from flask import current_app
+        with current_app.app_context():
+            big_board = app.test_client().get('/api/fantasy-big-board').get_json()[:10]
+    except Exception:
+        pass
+    trending = []
+    try:
+        from flask import current_app
+        with current_app.app_context():
+            trending = app.test_client().get('/api/trending').get_json()
+    except Exception:
+        pass
+
+    # Compose system prompt for GPT-4o
     system_prompt = (
-        "You are a fantasy football assistant named 4DN Chat. Only answer fantasy-related questions such as start/sit advice, trade evaluations, injury reports, and weather impacts. "
-        "Provide detailed, helpful, and easy-to-understand responses. Include: Opponent defensive ranking, weather and location (home/away), game script expectations (e.g., shootouts), and notable injuries to teammates or defenders. "
-        "Keep answers friendly, informed, and clear."
+        "You are 4DN Fantasy Assistant, an expert in all things fantasy football and NFL. "
+        "You ONLY answer questions about fantasy football, NFL, players, teams, draft strategy, projections, injuries, trades, and related topics. "
+        "If a question is not about football, politely refuse.\n"
+        "You have access to the user's custom algorithmic projections, rankings, and trending data.\n"
+        f"Top 10 Big Board: {[f'{p['name']} ({p['position']}, {p['team']})' for p in big_board]}\n"
+        f"Top Risers: {[f'{p['name']} ({p['position']}, +{p['change']})' for p in trending.get('risers', [])]}\n"
+        f"Top Fallers: {[f'{p['name']} ({p['position']}, {p['change']})' for p in trending.get('fallers', [])]}\n"
+        "Always use this data to inform your answers. Be specific, cite stats, and explain your reasoning.\n"
+        "For draft strategy, reference the Big Board and trending players. For player/team info, use projections and recent trends.\n"
+        "Keep answers friendly, clear, and actionable."
     )
     try:
         completion = openai.ChatCompletion.create(
@@ -195,7 +219,7 @@ def fantasy_chat():
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
             ],
-            max_tokens=400,
+            max_tokens=500,
             temperature=0.7
         )
         reply = completion.choices[0].message['content'].strip()
@@ -735,6 +759,36 @@ def login():
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
+
+@app.route('/api/fantasy-big-board')
+def fantasy_big_board():
+    dummy_board = [
+        {"rank": 1, "name": "Christian McCaffrey", "team": "SF", "position": "RB", "bye": 9, "score": 98.45},
+        {"rank": 2, "name": "Justin Jefferson", "team": "MIN", "position": "WR", "bye": 13, "score": 96.22},
+        {"rank": 3, "name": "Josh Allen", "team": "BUF", "position": "QB", "bye": 12, "score": 94.78},
+        {"rank": 4, "name": "Travis Kelce", "team": "KC", "position": "TE", "bye": 10, "score": 93.01},
+        # ... up to 100
+    ]
+    return jsonify(dummy_board)
+
+# --- Fantasy Football News API Route ---
+@app.route('/api/news')
+def api_news():
+    """
+    Returns a list of fantasy football news items as JSON.
+    To integrate real news in the future, replace the dummy news_items list
+    with a call to a real news-fetching function (e.g., from a scraper or API).
+    The output should remain a list of dicts with keys: headline, summary, time.
+    """
+    # TODO: Replace this with a call to a real news source or cache
+    news_items = [
+        {"headline": "Justin Jefferson returns to practice, expected to play Week 1", "summary": "Vikings star WR Justin Jefferson (hamstring) was a full participant in Thursday's practice.", "time": "2h ago"},
+        {"headline": "Bijan Robinson primed for breakout season", "summary": "Falcons RB Bijan Robinson has impressed coaches and is expected to see a heavy workload.", "time": "3h ago"},
+        {"headline": "Patrick Mahomes: 'We're ready to defend our title'", "summary": "Chiefs QB Patrick Mahomes says the team is focused and healthy heading into the opener.", "time": "4h ago"},
+        {"headline": "CMC remains top fantasy pick despite tough schedule", "summary": "Christian McCaffrey (SF) faces a challenging slate but remains the consensus 1.01.", "time": "5h ago"},
+        {"headline": "Injury update: Cooper Kupp questionable for Week 1", "summary": "Rams WR Cooper Kupp (hamstring) is questionable but making progress.", "time": "6h ago"}
+    ]
+    return jsonify(news_items)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

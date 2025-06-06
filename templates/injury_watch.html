@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Lock Modal for Live Data Access -->
+{% if current_date < launch_date %}
+  <div id="lockModal" class="modal show d-block bg-dark bg-opacity-75">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <h4 class="mb-3">🚧 4DN Launches August 1st</h4>
+        <p>This feature is currently locked while we finalize live data integration. Come back August 1st for full access to real-time fantasy intelligence.</p>
+      </div>
+    </div>
+  </div>
+  {% set lock = true %}
+{% else %}
+  {% set lock = false %}
+{% endif %}
+{% if lock %}
+  <!-- Prevent rest of page from rendering -->
+{% else %}
+<div class="container py-4">
+  <div class="injury-header">
+    <i class="bi bi-heart-pulse-fill text-danger me-2"></i>Injury Watch & Player News
+  </div>
+  <div class="injury-summary">
+    <i class="bi bi-robot me-2"></i>Track player health like a pro. Injury Watch delivers up-to-date injury histories, curated headlines from trusted outlets, and real-time insights from analysts across the web. We also monitor verified social media sources like X. to provide the most current and reliable injury updates anywhere. Our AI-generated summaries break down timelines, severity, and fantasy impact — so you’re never caught off guard.
+  </div>
+  <form method="GET" class="row justify-content-center mb-4">
+    <div class="col-md-5 col-10">
+      <input type="text" name="player" class="form-control form-control-lg" placeholder="Search for a player (e.g. Jefferson, Mahomes, etc.)" value="{{ request.args.get('player', '') }}">
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary btn-lg">Search</button>
+    </div>
+  </form>
+  <div class="injury-row">
+    <div class="injury-col">
+      <div class="injury-card">
+        <div class="card-title"><i class="bi bi-activity text-warning me-2"></i>Key Injuries</div>
+        {% for injury in injuries %}
+          <div class="card-text"><strong>{{ injury.player or injury['player'] }}</strong> ({{ injury.team or injury['team'] }})<br><span class="card-meta">{{ injury.status or injury['status'] }}</span> - {{ injury.note or injury['note'] }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="injury-col">
+      <div class="injury-card">
+        <div class="card-title"><i class="bi bi-newspaper text-info me-2"></i>Latest News</div>
+        {% for news in news_items %}
+          <div class="card-text"><strong>{{ news.headline }}</strong><br><span class="card-meta">{{ news.time }}</span> - {{ news.summary }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="injury-col">
+      <div class="injury-card">
+        <div class="card-title"><i class="bi bi-twitter text-primary me-2"></i>Trending Tweets</div>
+        {% for tweet in tweets %}
+          <div class="card-text"><strong>@{{ tweet.user }}</strong><br><span class="card-meta">{{ tweet.time }}</span> - {{ tweet.text }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <h4 class="mt-5 mb-3">📊 Team Injury Heatmap by Position Group</h4>
+  <div class="injury-heatmap-card card shadow mb-5">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="injury-heatmap-table table table-bordered text-center align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Team</th>
+              {% for pos in heatmap_data[0].keys() if pos != 'team' %}
+                <th>{{ pos }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in heatmap_data %}
+              <tr>
+                <td><strong>{{ row['team'] }}</strong></td>
+                {% for pos in heatmap_data[0].keys() if pos != 'team' %}
+                  {% set val = row[pos] %}
+                  <td class="{% if val == 0 %}heatmap-healthy{% elif val == 1 %}heatmap-questionable{% else %}heatmap-injured{% endif %}" title="{% if val == 0 %}Healthy{% elif val == 1 %}Questionable{% else %}Injured{% endif %}">
+                    {% if val == 0 %}<span>🟢</span>{% elif val == 1 %}<span>🟡</span>{% else %}<span>🔴</span>{% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.injury-header {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #00bfff;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.injury-summary {
+  background: linear-gradient(90deg, #ffe066 0%, #00bfff 100%);
+  color: #181c24;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 16px 0 #00ffd066;
+  font-size: 1.13rem;
+  font-weight: 500;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 2.2rem;
+  text-align: center;
+}
+.injury-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+.injury-col {
+  flex: 1 1 320px;
+  max-width: 32%;
+  min-width: 300px;
+  display: flex;
+}
+.injury-card {
+  background: rgba(24, 28, 36, 0.96);
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px #00bfff33, 0 1.5px 0 #00ff99cc;
+  border: 1.5px solid #00bfff44;
+  padding: 1.3rem 1.2rem 1.1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+}
+.injury-card .card-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #00ff99;
+  margin-bottom: 0.7rem;
+  letter-spacing: 0.5px;
+}
+.injury-card .card-text {
+  color: #f5f6fa;
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.injury-card .card-meta {
+  color: #ffe066;
+  font-size: 0.98rem;
+  margin-bottom: 0.3rem;
+}
+.injury-card .card-status {
+  font-weight: 700;
+  color: #ff416c;
+  font-size: 1.08rem;
+  margin-bottom: 0.2rem;
+}
+.injury-heatmap-card {
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px #00bfff33, 0 1.5px 0 #00ff99cc;
+  border: 1.5px solid #00bfff44;
+  background: rgba(24, 28, 36, 0.98);
+  margin-bottom: 2.5rem;
+}
+.injury-heatmap-table thead th {
+  background: linear-gradient(90deg, #23272f 0%, #181c24 100%);
+  color: #00ff99;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-top-left-radius: 1.2rem;
+  border-top-right-radius: 1.2rem;
+  border-bottom: 2px solid #00bfff44;
+}
+.injury-heatmap-table td, .injury-heatmap-table th {
+  border: none !important;
+  font-size: 1.01rem;
+  padding: 0.7rem 0.5rem;
+  color: #f5f6fa;
+}
+.injury-heatmap-table tr:nth-child(even) td {
+  background: rgba(30,34,45,0.85);
+}
+.injury-heatmap-table .heatmap-healthy {
+  background: linear-gradient(90deg, #1e2a22 60%, #00ff99 100%);
+  color: #00ff99;
+}
+.injury-heatmap-table .heatmap-questionable {
+  background: linear-gradient(90deg, #2a2920 60%, #ffe066 100%);
+  color: #ffe066;
+}
+.injury-heatmap-table .heatmap-injured {
+  background: linear-gradient(90deg, #2a1e22 60%, #ff416c 100%);
+  color: #ff416c;
+}
+.injury-heatmap-table .heatmap-healthy span,
+.injury-heatmap-table .heatmap-questionable span,
+.injury-heatmap-table .heatmap-injured span {
+  font-size: 1.25rem;
+  font-weight: 700;
+  filter: drop-shadow(0 0 2px #181c24);
+}
+.injury-heatmap-table td {
+  vertical-align: middle;
+  border-radius: 0.5rem;
+}
+.injury-heatmap-table tr:hover td {
+  background: #23272f !important;
+  transition: background 0.15s;
+}
+@media (max-width: 991px) {
+  .injury-heatmap-table th, .injury-heatmap-table td {
+    font-size: 0.97rem;
+    padding: 0.5rem 0.2rem;
+  }
+}
+</style>
+{% endif %}
+{% endblock %}
