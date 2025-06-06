@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{% include 'paywall_modal.html' %}
 <div class="container mt-4">
   <div class="alert alert-info" style="background: linear-gradient(90deg, #00ff99 0%, #00bfff 100%); color: #181c24; border: none; border-radius: 1.2rem; box-shadow: 0 2px 16px 0 #00ffd066; font-size: 1.13rem; font-weight: 500; letter-spacing: 0.2px; padding: 1.2rem 1.5rem; margin-bottom: 2.2rem;">
     <span style="font-size:1.35rem;vertical-align:middle;">🎯</span>
@@ -86,7 +87,7 @@
     document.getElementById('regenerate-lineup').addEventListener('click', function() {
       // Shuffle the lineup for demo purposes (simulate regeneration)
       fetch('/api/dfs-lineup')
-        .then(r => r.json())
+        .then r => r.json())
         .then(data => {
           currentLineup = data.lineup.sort(() => Math.random() - 0.5); // shuffle for fake regeneration
           currentReasoning = data.reasoning + ' (Regenerated)';
