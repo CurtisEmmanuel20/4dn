@@ -3,3 +3,4 @@ Flask-RESTful==0.3.9
 beautifulsoup4
 requests
 gunicorn
+Werkzeug<2.1.0
