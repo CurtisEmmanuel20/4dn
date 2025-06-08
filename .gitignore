@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+env/
+venv/
+ENV/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# SQLite DB
+*.db
+
+# Environment/config
+.env
+.env.*
+*.env
+
+# Data files
+*.csv
+*.json
+
+# Node/npm
+node_modules/
+
+# Logs
+*.log
+
+# Compiled
+*.so
+*.dll
+*.exe
+
+# Flask static/build
+/build/
+/static/
+/media/
+
+# Ignore secrets
+stripe_config.py

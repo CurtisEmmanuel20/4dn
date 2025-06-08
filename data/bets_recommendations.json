@@ -1,85 +1,68 @@
 {
   "moneyline_picks": [
     {
-      "team": "Browns",
-      "odds": "-115",
-      "confidence": 82,
-      "note": "Injury boost"
-    },
-    {
       "team": "Chiefs",
-      "odds": "-233",
-      "confidence": 60,
+      "odds": "-146",
+      "confidence": 71,
       "note": "Weather edge"
     },
     {
-      "team": "Bills",
-      "odds": "-174",
-      "confidence": 64,
+      "team": "Chiefs",
+      "odds": "-223",
+      "confidence": 62,
+      "note": "Injury boost"
+    },
+    {
+      "team": "Packers",
+      "odds": "-118",
+      "confidence": 61,
       "note": "Revenge game"
     },
     {
-      "team": "Bengals",
-      "odds": "-125",
-      "confidence": 71,
-      "note": "QB mismatch"
+      "team": "Jets",
+      "odds": "-243",
+      "confidence": 66,
+      "note": "Strong home trends"
     },
     {
-      "team": "Browns",
-      "odds": "-241",
-      "confidence": 79,
-      "note": "QB mismatch"
-    },
-    {
-      "team": "Rams",
-      "odds": "-250",
-      "confidence": 86,
-      "note": "QB mismatch"
+      "team": "Dolphins",
+      "odds": "-245",
+      "confidence": 68,
+      "note": "Hot streak"
     }
   ],
   "parlay_recommendations": [
     {
       "legs": [
-        "Bills ML",
-        "Chiefs ML",
-        "Chiefs ML",
-        "Packers ML"
+        "Eagles ML",
+        "49ers ML",
+        "Giants ML",
+        "Dolphins ML"
       ],
       "risk": "Aggressive",
-      "payout": "+563",
+      "payout": "+1127",
       "note": "Weather edge"
     },
     {
       "legs": [
-        "Cowboys ML",
-        "Packers ML",
-        "Rams ML",
-        "Chiefs ML"
-      ],
-      "risk": "Aggressive",
-      "payout": "+652",
-      "note": "Mahomes vs bottom-10 defense"
-    },
-    {
-      "legs": [
-        "Bengals ML",
-        "Jets ML",
-        "Packers ML"
+        "Giants ML",
+        "Bengals ML"
       ],
       "risk": "Moderate",
-      "payout": "+754",
-      "note": "Elite defense and home advantage"
+      "payout": "+608",
+      "note": "Weather edge"
     },
     {
       "legs": [
-        "Rams ML",
-        "Chiefs ML",
-        "Chiefs ML"
+        "Eagles ML",
+        "Eagles ML",
+        "Vikings ML",
+        "Cowboys ML"
       ],
       "risk": "Aggressive",
-      "payout": "+411",
-      "note": "QB mismatch"
+      "payout": "+716",
+      "note": "Elite defense and home advantage"
     }
   ],
-  "generated_at": "2025-06-04 23:10:09.014635"
+  "generated_at": "2025-06-07 15:05:00.019405"
 }

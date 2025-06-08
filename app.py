@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect, url_for, render_template
+from flask import Flask, jsonify, request, redirect, url_for, render_template, session
 from dotenv import load_dotenv
 import os
 import sqlite3
@@ -17,6 +17,15 @@ from bets_recommendation_generator import generate_bets_data
 from datetime import datetime
 from matchup_pool import refresh_elite_matchups, current_elite_players
 from flask import render_template
+from scrapers.yahoo_news import scrape_yahoo_news
+from scrapers.fantasypros_news import scrape_fantasypros_news
+import difflib
+import pytz
+from utils.fantasy_scraper import scrape_fantasypros_rankings, scrape_yahoo_adp, cache_player_data, load_cached_data
+from ranking_engine import generate_4dn_rankings
+from caching.fantasy_cache import save_big_board_cache, load_cached_big_board
+import atexit
+from rankings_data import RANKINGS
 
 load_dotenv()  # This loads the .env file
 
@@ -31,7 +40,8 @@ eastern = timezone("US/Eastern")
 # Set up scheduler
 scheduler = BackgroundScheduler(timezone=eastern)
 scheduler.add_job(generate_bets_data, 'cron', hour=0, minute=5)  # 12:05 AM EST
-scheduler.start()
+# Schedule news refresh every 6 hours
+scheduler.add_job(generate_bets_data, 'cron', hour='*/6', minute=5)  # Every 6 hours at HH:05
 # Run once at startup
 generate_bets_data()
 
@@ -147,6 +157,7 @@ def fantasy_chat():
     - All fantasy football and NFL questions: draft strategy, player/team info, start/sit, trades, injuries, projections, etc.
     - Uses your algorithmic projections and data as context for more accurate, personalized answers.
     - Only answers football-related questions (fantasy or NFL).
+    - Maintains a short conversation memory (last 3 exchanges) per user session for context.
     """
     data = request.get_json()
     user_message = data.get('message', '').strip() if data else ''
@@ -183,46 +194,68 @@ def fantasy_chat():
             summary = f"{pname} ({pos}) is projected for {pts} points for {team} vs {opp}. "
             player_stats.append(summary)
 
-    # Add algorithmic context: load top 10 from Big Board and trending players
-    big_board = []
+    # Conversation memory: store last 3 exchanges (6 messages) in session
+    chat_history = session.get('chat_history', [])
+    # Prepare Big Board and trending context for the system prompt
+    top10 = [f"{p['name']} ({p['position']}, {p['team']})" for p in RANKINGS[:10]]
+    # Try to get trending risers/fallers from the trending_players() function
     try:
         from flask import current_app
-        with current_app.app_context():
-            big_board = app.test_client().get('/api/fantasy-big-board').get_json()[:10]
+        with app.test_request_context():
+            trending_resp = trending_players().get_json()
+        risers = [f"{p['name']} ({p['position']}, +{p['change']})" for p in trending_resp.get('risers', [])]
+        fallers = [f"{p['name']} ({p['position']}, {p['change']})" for p in trending_resp.get('fallers', [])]
     except Exception:
-        pass
-    trending = []
-    try:
-        from flask import current_app
-        with current_app.app_context():
-            trending = app.test_client().get('/api/trending').get_json()
-    except Exception:
-        pass
-
+        risers = []
+        fallers = []
     # Compose system prompt for GPT-4o
     system_prompt = (
-        "You are 4DN Fantasy Assistant, an expert in all things fantasy football and NFL. "
-        "You ONLY answer questions about fantasy football, NFL, players, teams, draft strategy, projections, injuries, trades, and related topics. "
-        "If a question is not about football, politely refuse.\n"
+        "You are 4DN Fantasy Assistant, an expert analytical coach for fantasy football and NFL, and a smart site guide. "
+        "You ONLY answer questions about fantasy football, NFL, players, teams, draft strategy, projections, injuries, trades, and related topics, as well as questions about the 4DN Fantasy Football website and its features. "
+        "You are deeply versed in all fantasy football formats (redraft, dynasty, best ball, DFS, IDP, superflex, etc.), scoring systems (PPR, half-PPR, standard, etc.), and advanced terminology (ADP, waiver wire, handcuff, sleeper, etc.). "
+        "You know that Opening Day for the 2025 NFL season is September 4, 2025. If a user asks about Opening Day, explain what it is and when it is. "
+        "You know the Season Pass is a one-time $10 purchase (pre-sale, normally $25) that unlocks all premium features on the site for the entire 2025 fantasy football season. It covers access to draft tools, rankings, AI chat, DFS tools, betting insights, and more, and expires at the end of the 2025 season. There are no recurring charges. "
+        "If a user asks about the Season Pass, explain what it is, what it gives, how it works, and how to get it. "
+        "You are also trained to answer most customer-related questions, such as how to sign up, how to log in, how to reset a password, how to use the Big Board, how to access features, and how to get support. Always provide clear, step-by-step instructions and be friendly and helpful. "
+        "If a question is not about football, the website, or customer support, politely refuse.\n"
         "You have access to the user's custom algorithmic projections, rankings, and trending data.\n"
-        f"Top 10 Big Board: {[f'{p['name']} ({p['position']}, {p['team']})' for p in big_board]}\n"
-        f"Top Risers: {[f'{p['name']} ({p['position']}, +{p['change']})' for p in trending.get('risers', [])]}\n"
-        f"Top Fallers: {[f'{p['name']} ({p['position']}, {p['change']})' for p in trending.get('fallers', [])]}\n"
+        f"Top 10 Big Board: {top10}\n"
+        f"Top Risers: {risers}\n"
+        f"Top Fallers: {fallers}\n"
         "Always use this data to inform your answers. Be specific, cite stats, and explain your reasoning.\n"
+        "When giving advice, always explain your reasoning step-by-step, referencing the flow of your analysis or algorithm (e.g., how you weighed projections, matchups, trends, and format).\n"
+        "For every answer, use a clear, structured format: start with a direct answer, then provide supporting details, and finish with a concise summary or actionable next step.\n"
         "For draft strategy, reference the Big Board and trending players. For player/team info, use projections and recent trends.\n"
-        "Keep answers friendly, clear, and actionable."
+        "If the user uses fantasy football terminology or abbreviations, always understand and clarify if needed.\n"
+        "If the user asks about a feature, tool, or section of the site, provide a helpful walkthrough or explanation.\n"
+        "If the user asks about Opening Day, the Season Pass, or how to use the site, answer with up-to-date, accurate, and friendly information.\n"
+        "Respond in a professional, intelligent, and structured tone. For football questions, be analytical and coach-like. For site and customer support, be clear, friendly, and helpful.\n"
+        "Keep answers friendly, clear, and actionable.\n"
+        "All responses must be short and concise, with a maximum of 3 sentences."
     )
     try:
-        completion = openai.ChatCompletion.create(
+        messages = [
+            {"role": "system", "content": system_prompt}
+        ]
+        # Add up to last 6 messages (3 exchanges) from chat_history
+        for msg in chat_history[-6:]:
+            messages.append(msg)
+        # Add the new user message as the last message
+        messages.append({"role": "user", "content": user_message})
+        completion = openai.chat.completions.create(
             model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message}
-            ],
+            messages=messages,
             max_tokens=500,
             temperature=0.7
         )
-        reply = completion.choices[0].message['content'].strip()
+        reply = completion.choices[0].message.content.strip()
+        # After getting reply, append both user and assistant messages to chat_history
+        chat_history.append({'role': 'user', 'content': user_message})
+        chat_history.append({'role': 'assistant', 'content': reply})
+        # Only keep last 6 messages (3 exchanges)
+        if len(chat_history) > 6:
+            chat_history = chat_history[-6:]
+        session['chat_history'] = chat_history
         if player_stats:
             reply = '\n'.join(player_stats) + '\n' + reply
         return {"response": reply}, 200
@@ -423,13 +456,13 @@ def player_compare():
             prompt = f"Compare these two fantasy football rosters. Roster 1: {[roster1[slot] for slot, _ in roster_slots]}. Roster 2: {[roster2[slot] for slot, _ in roster_slots]}. Based on projected points, matchups, and recent performance, which roster is favored and why? Limit response to 2 sentences."
             try:
                 openai.api_key = os.environ.get('OPENAI_API_KEY')
-                response = openai.ChatCompletion.create(
+                response = openai.chat.completions.create(
                     model="gpt-4o",
                     messages=[{"role": "user", "content": prompt}],
                     max_tokens=100,
                     temperature=0.7
                 )
-                ai_recommendation = response['choices'][0]['message']['content'].strip()
+                ai_recommendation = response.choices[0].message.content.strip()
             except Exception as e:
                 ai_recommendation = "AI recommendation unavailable."
         else:
@@ -460,13 +493,13 @@ def player_compare():
                 prompt = f"Compare these two fantasy football players: {player1} and {player2}. Based on their projected points, matchup difficulty, and last 3 games, who should I start? Be specific and mention stats. Limit response to 2 informative sentences."
                 try:
                     openai.api_key = os.environ.get('OPENAI_API_KEY')
-                    response = openai.ChatCompletion.create(
+                    response = openai.chat.completions.create(
                         model="gpt-4o",
                         messages=[{"role": "user", "content": prompt}],
                         max_tokens=80,
                         temperature=0.7
                     )
-                    ai_recommendation = response['choices'][0]['message']['content'].strip()
+                    ai_recommendation = response.choices[0].message.content.strip()
                 except Exception as e:
                     ai_recommendation = "AI recommendation unavailable."
     return render_template('player_compare.html', player_names=player_names, compare_result=compare_result, ai_recommendation=ai_recommendation, roster_slots=roster_slots)
@@ -574,7 +607,7 @@ def start_sit():
                 max_tokens=300,
                 temperature=0.7
             )
-            ai_recommendation = response['choices'][0]['message']['content'].strip()
+            ai_recommendation = response.choices[0].message.content.strip()
         except Exception as e:
             ai_recommendation = "AI error occurred."
     # Always show chart_data for the fake players
@@ -752,43 +785,213 @@ def player_rankings():
         print('ERROR in /rankings route:', e)
         return render_template("player_rankings.html", data=[])
 
-@app.route('/login')
-def login():
-    return render_template('login.html')
+@app.route('/auth', methods=['GET'])
+def auth():
+    # Show the combined login/signup page
+    return render_template('auth.html')
 
-@app.route('/signup')
-def signup():
-    return render_template('signup.html')
+@app.route('/login', methods=['POST'])
+def login_post():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('SELECT id, username, password, season_pass FROM users WHERE email = ?', (email,))
+    user = c.fetchone()
+    conn.close()
+    if user and check_password_hash(user[2], password):
+        session['user_id'] = user[0]
+        session['username'] = user[1]
+        session['season_pass'] = bool(user[3])
+        return redirect(url_for('account_dashboard'))
+    else:
+        return render_template('auth.html', error='Invalid credentials.', error_type='login')
+
+@app.route('/signup', methods=['POST'])
+def signup_post():
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    if not username or not email or not password:
+        return render_template('auth.html', error='All fields required.', error_type='signup')
+    hashed_pw = generate_password_hash(password)
+    try:
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, hashed_pw))
+        conn.commit()
+        conn.close()
+        return render_template('auth.html', error='Account created! Please log in.', error_type='login')
+    except sqlite3.IntegrityError:
+        return render_template('auth.html', error='Username or email already exists.', error_type='signup')
+
+@app.route('/account')
+def account_dashboard():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('SELECT username, email, season_pass FROM users WHERE id = ?', (user_id,))
+    row = c.fetchone()
+    conn.close()
+    user = {
+        'username': row[0],
+        'email': row[1],
+        'season_pass': bool(row[2]),
+        'created_at': datetime.now(),  # For demo, not stored in DB
+        'subscription': {'plan': 'Season Pass' if row[2] else 'None', 'active': bool(row[2]), 'next_billing': '--', 'can_switch': False},
+        'payment_history': [
+            {'date': '2025-06-01', 'amount': '$25.00', 'plan': 'Season Pass'} if row[2] else None
+        ] if row[2] else []
+    }
+    return render_template('account_dashboard.html', user=user)
+
+def get_live_4dn_big_board():
+    # Scrape both sources
+    fpros = scrape_fantasypros_rankings()
+    yahoo = scrape_yahoo_adp()
+    # Merge by name/team/position
+    merged = {}
+    for p in fpros:
+        key = (p['name'].lower(), p['team'], p['position'])
+        merged[key] = p.copy()
+    for p in yahoo:
+        key = (p['name'].lower(), p['team'], p['position'])
+        if key in merged:
+            merged[key]['yahoo_adp'] = p.get('yahoo_adp')
+        else:
+            merged[key] = p.copy()
+    # Fill missing fields
+    for v in merged.values():
+        v.setdefault('fantasypros_rank', None)
+        v.setdefault('yahoo_adp', None)
+        v.setdefault('projected_points', 0)
+        v.setdefault('sos', 5.0)
+    # Generate 4DN rankings
+    ranked = generate_4dn_rankings(list(merged.values()))
+    return ranked
 
 @app.route('/api/fantasy-big-board')
-def fantasy_big_board():
-    dummy_board = [
-        {"rank": 1, "name": "Christian McCaffrey", "team": "SF", "position": "RB", "bye": 9, "score": 98.45},
-        {"rank": 2, "name": "Justin Jefferson", "team": "MIN", "position": "WR", "bye": 13, "score": 96.22},
-        {"rank": 3, "name": "Josh Allen", "team": "BUF", "position": "QB", "bye": 12, "score": 94.78},
-        {"rank": 4, "name": "Travis Kelce", "team": "KC", "position": "TE", "bye": 10, "score": 93.01},
-        # ... up to 100
-    ]
-    return jsonify(dummy_board)
+def get_4dn_board():
+    position = request.args.get('position', None)
+    # Filter by position if provided
+    if position:
+        filtered = [p for p in RANKINGS if p['position'].upper() == position.upper()]
+    else:
+        filtered = RANKINGS
+    # Generate 4DN scores (rank-based)
+    from ranking_engine import generate_4dn_rankings
+    rankings = generate_4dn_rankings(filtered)
+    return jsonify(rankings)
 
 # --- Fantasy Football News API Route ---
 @app.route('/api/news')
 def api_news():
     """
     Returns a list of fantasy football news items as JSON.
-    To integrate real news in the future, replace the dummy news_items list
-    with a call to a real news-fetching function (e.g., from a scraper or API).
-    The output should remain a list of dicts with keys: headline, summary, time.
+    Now fetches live news from Yahoo Sports and FantasyPros, deduplicated by similar headlines.
     """
-    # TODO: Replace this with a call to a real news source or cache
-    news_items = [
-        {"headline": "Justin Jefferson returns to practice, expected to play Week 1", "summary": "Vikings star WR Justin Jefferson (hamstring) was a full participant in Thursday's practice.", "time": "2h ago"},
-        {"headline": "Bijan Robinson primed for breakout season", "summary": "Falcons RB Bijan Robinson has impressed coaches and is expected to see a heavy workload.", "time": "3h ago"},
-        {"headline": "Patrick Mahomes: 'We're ready to defend our title'", "summary": "Chiefs QB Patrick Mahomes says the team is focused and healthy heading into the opener.", "time": "4h ago"},
-        {"headline": "CMC remains top fantasy pick despite tough schedule", "summary": "Christian McCaffrey (SF) faces a challenging slate but remains the consensus 1.01.", "time": "5h ago"},
-        {"headline": "Injury update: Cooper Kupp questionable for Week 1", "summary": "Rams WR Cooper Kupp (hamstring) is questionable but making progress.", "time": "6h ago"}
-    ]
+    def deduplicate_news(news_items, threshold=0.7):
+        deduped = []
+        seen = []
+        for item in news_items:
+            headline = item['headline']
+            # Check if this headline is too similar to any already included
+            if any(difflib.SequenceMatcher(None, headline, s).ratio() > threshold for s in seen):
+                continue
+            deduped.append(item)
+            seen.append(headline)
+        return deduped
+    try:
+        yahoo_news = scrape_yahoo_news(max_items=8)
+        fp_news = scrape_fantasypros_news(max_items=8)
+        news_items = (yahoo_news or []) + (fp_news or [])
+        news_items = deduplicate_news(news_items, threshold=0.7)
+        if not news_items:
+            raise Exception("No news scraped")
+    except Exception as e:
+        news_items = [
+            {"headline": "Justin Jefferson returns to practice, expected to play Week 1", "summary": "Vikings star WR Justin Jefferson (hamstring) was a full participant in Thursday's practice.", "time": "2h ago"},
+            {"headline": "Bijan Robinson primed for breakout season", "summary": "Falcons RB Bijan Robinson has impressed coaches and is expected to see a heavy workload.", "time": "3h ago"},
+            {"headline": "Patrick Mahomes: 'We're ready to defend our title'", "summary": "Chiefs QB Patrick Mahomes says the team is focused and healthy heading into the opener.", "time": "4h ago"},
+            {"headline": "CMC remains top fantasy pick despite tough schedule", "summary": "Christian McCaffrey (SF) faces a challenging slate but remains the consensus 1.01.", "time": "5h ago"},
+            {"headline": "Injury update: Cooper Kupp questionable for Week 1", "summary": "Rams WR Cooper Kupp (hamstring) is questionable but making progress.", "time": "6h ago"}
+        ]
     return jsonify(news_items)
+
+@app.route('/subscription')
+def subscription():
+    return render_template('subscription.html', stripe_public_key=os.getenv("STRIPE_PUBLIC_KEY"))
+
+@app.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        mode='subscription',
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': '4DN Premium Subscription',
+                },
+                'unit_amount': 999,
+                'recurring': {'interval': 'month'},
+            },
+            'quantity': 1,
+        }],
+        success_url=url_for('payment_success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url=url_for('subscription', _external=True),
+    )
+    return redirect(session.url, code=303)
+
+def scheduled_update():
+    try:
+        data = scrape_fantasypros_rankings()
+        if data:
+            cache_player_data(data)
+            print("Fantasy data updated.")
+    except:
+        print("Update failed – using cached data.")
+
+# Add schedule:
+today = datetime(2025, 6, 4)
+mid_july = datetime(2025, 7, 16)
+
+if datetime.now() < mid_july:
+    scheduler.add_job(scheduled_update, 'interval', days=14)
+else:
+    scheduler.add_job(scheduled_update, 'interval', days=2)
+
+# Only call scheduler.start() once, after all jobs are added
+scheduler.start()
+atexit.register(lambda: scheduler.shutdown())
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return '', 204
+
+@app.route('/buy-season-pass', methods=['POST'])
+def buy_season_pass():
+    user_id = session.get('user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    # Grant lifetime access by setting season_pass to 1 (true)
+    c.execute('UPDATE users SET season_pass = 1 WHERE id = ?', (user_id,))
+    conn.commit()
+    conn.close()
+    session['season_pass'] = True
+    # Optionally, add a payment record to payment_history (not implemented in DB)
+    return redirect(url_for('account_dashboard'))
+
+@app.route('/league-newsroom')
+def league_newsroom():
+    from utils.league_newsroom import generate_fake_news_data
+    news_data = generate_fake_news_data(league_id="demo")  # Update later for real integrations
+    return render_template("league_newsroom.html", news_data=news_data)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

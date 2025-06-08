@@ -7,6 +7,8 @@
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add XO's chalkboard font for site title -->
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
     <style>
         body {
             background: #181c24;
@@ -53,21 +55,41 @@
                 padding: 1rem 0.5rem;
             }
         }
+        .chalkboard-xo {
+            font-family: 'Permanent Marker', cursive !important;
+            letter-spacing: 1.5px;
+            font-size: 1.45rem;
+            color: #00bfff;
+            text-shadow: 1px 2px 0 #23272f, 0 0 8px #00bfff55;
+        }
+        .chalkboard-xo-sub {
+            font-family: 'Permanent Marker', cursive !important;
+            font-size: 1.08rem;
+            color: #181c24;
+            font-weight: 600;
+            margin-left: 0.6em;
+            letter-spacing: 1.5px;
+            text-shadow: 1px 2px 0 #ffe06644;
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
 <body>
     <div class="top-banner d-flex justify-content-between align-items-center">
         <div>
-            <span style="font-size:1.5rem;letter-spacing:2px;">4DN Fantasy Football</span>
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="/" style="font-size:1.45rem; letter-spacing:1px; color:#181c24;">
+              4DN Fantasy Football
+              <span class="d-none d-md-inline chalkboard-xo-sub">4th Down &amp; Numbers</span>
+            </a>
         </div>
         <ul class="navbar-nav ms-auto d-flex flex-row align-items-center" style="margin-bottom:0;">
-          <li class="nav-item">
-            <a class="nav-link btn btn-outline-primary btn-sm me-2" href="{{ url_for('login') }}">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link btn btn-outline-success btn-sm" href="{{ url_for('signup') }}">Sign Up</a>
-          </li>
+          <!-- Modern Auth Button -->
+          {% if not session.get('user_id') %}
+          <a href="/auth" class="btn btn-accent ms-2 px-4 py-2 fw-bold shadow" style="background:linear-gradient(90deg,#00bfff 0%,#00ff99 100%); color:#181c24; border-radius:0.7rem; font-size:1.08rem; letter-spacing:1px; border:none; box-shadow:0 2px 12px #00bfff33; transition:background 0.2s;">Login / Sign Up</a>
+          {% else %}
+          <a href="/account" class="btn ms-2 px-4 py-2 fw-bold shadow" style="background:linear-gradient(90deg,#ffe066 0%,#00bfff 100%); color:#181c24; border-radius:0.7rem; font-size:1.08rem; letter-spacing:1px; border:none; box-shadow:0 2px 12px #ffe06666, 0 2px 12px #00bfff33; font-weight:800; transition:background 0.2s;">My Account</a>
+          <button onclick="logout(); return false;" class="btn btn-outline-warning ms-2 px-4 py-2 fw-bold shadow" style="border-radius:0.7rem; font-size:1.08rem; letter-spacing:1px; border:2px solid #ffe066; color:#ffe066; background:transparent; transition:background 0.2s;">Log Out</button>
+          {% endif %}
         </ul>
     </div>
     <div class="container-fluid">
@@ -91,6 +113,9 @@
                 <a href="{{ url_for('player_rankings') }}" class="nav-link {% if request.path == '/rankings' %}active{% endif %}">
                     <i class="bi bi-list-ol"></i> Player Rankings
                 </a>
+                <a href="{{ url_for('league_newsroom') }}" class="nav-link {% if request.path == '/league-newsroom' %}active{% endif %}">
+                    <i class="bi bi-newspaper"></i> 📰 League Newsroom
+                </a>
             </nav>
             <main class="col px-0 main-content">
                 {% block content %}{% endblock %}
@@ -99,6 +124,13 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script>
+    function logout() {
+      fetch('/logout', { method: 'POST' })
+        .then(() => window.location.href = '/')
+        .catch(() => window.location.href = '/');
+    }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

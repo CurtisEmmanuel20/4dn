@@ -1,0 +1,14 @@
+<!-- Subscription Page -->
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5 text-center">
+  <h2 class="mb-4">Subscribe to 4DN Premium</h2>
+  <p class="mb-4">Unlock all features, premium insights, and more. Cancel anytime.</p>
+  <form action="/create-checkout-session" method="POST">
+    <button type="submit" class="btn btn-success btn-lg">Subscribe for $9.99/month</button>
+  </form>
+  <div class="mt-4">
+    <small>Test mode: Use Stripe test card 4242 4242 4242 4242, any future date, any CVC.</small>
+  </div>
+</div>
+{% endblock %}

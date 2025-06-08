@@ -1,4 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
-{# Login page removed for public site #}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="card bg-dark text-light shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 1.2rem;">
+    <h3 class="mb-3 text-center" style="color:#00bfff;">Sign In to 4DN</h3>
+    {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="/login">
+      <div class="mb-3">
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control bg-dark text-light" id="email" name="email" required autocomplete="username">
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control bg-dark text-light" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-accent w-100" style="background:linear-gradient(90deg,#00bfff 0%,#00ff99 100%);color:#181c24;font-weight:700;border:none;box-shadow:0 0 8px #00ffd0a0;letter-spacing:1px;">Login</button>
+    </form>
+    <div class="text-center mt-3">
+      <a href="/signup" class="text-info">Don't have an account? Sign Up</a>
+    </div>
+    <div class="text-center mt-2">
+      <a href="/forgot-password" class="text-muted" style="font-size:0.97rem;">Forgot password?</a>
+    </div>
+  </div>
+</div>
 {% endblock %}
