@@ -1,34 +1,41 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 def scrape_fantasypros_news(max_items=10):
     """
     Scrapes the latest NFL news headlines from FantasyPros.
-    Returns a list of dicts: {headline, summary, time}
+    Returns a list of dicts: {headline, summary, time, url}
     """
     url = "https://www.fantasypros.com/nfl/news.php"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-
     news_items = []
-    for article in soup.select('div.news-feed-item'):
-        headline_tag = article.find('a', class_='news-feed-title')
-        summary_tag = article.find('div', class_='news-feed-summary')
-        time_tag = article.find('span', class_='news-feed-date')
-        url = headline_tag['href'] if headline_tag and headline_tag.has_attr('href') else ''
-        if url and url.startswith('/'):
-            url = f'https://www.fantasypros.com{url}'
-        if not headline_tag:
-            continue
-        headline = headline_tag.get_text(strip=True)
-        summary = summary_tag.get_text(strip=True) if summary_tag else ''
-        time_str = time_tag.get_text(strip=True) if time_tag else ''
-        news_items.append({
-            'headline': headline,
-            'summary': summary,
-            'time': time_str,
-            'url': url
-        })
-        if len(news_items) >= max_items:
-            break
+    # Find all news links that look like player news
+    for a in soup.find_all('a', href=True):
+        href = a['href']
+        if re.match(r"/nfl/news/\\d+/[a-z0-9\-]+.php", href):
+            headline = a.get_text(strip=True)
+            url_full = f'https://www.fantasypros.com{href}'
+            # Try to get summary and time from nearby elements
+            parent = a.find_parent('div')
+            summary = ''
+            time_str = ''
+            if parent:
+                # Look for summary in next siblings
+                next_div = parent.find_next_sibling('div')
+                if next_div:
+                    summary = next_div.get_text(strip=True)
+                # Look for time in previous siblings
+                prev_div = parent.find_previous_sibling('div')
+                if prev_div and 'EDT' in prev_div.get_text():
+                    time_str = prev_div.get_text(strip=True)
+            news_items.append({
+                'headline': headline,
+                'summary': summary,
+                'time': time_str,
+                'url': url_full
+            })
+            if len(news_items) >= max_items:
+                break
     return news_items

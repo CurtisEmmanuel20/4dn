@@ -1,95 +1,80 @@
 {
   "moneyline_picks": [
     {
-      "team": "Cowboys",
-      "odds": "-178",
-      "confidence": 75,
-      "note": "Division rivalry"
+      "team": "Seahawks",
+      "odds": "-152",
+      "confidence": 69,
+      "note": "Mahomes vs bottom-10 defense"
     },
     {
-      "team": "Jets",
-      "odds": "-220",
-      "confidence": 60,
-      "note": "Elite defense and home advantage"
-    },
-    {
-      "team": "Bills",
-      "odds": "-168",
-      "confidence": 78,
-      "note": "Weather edge"
+      "team": "Rams",
+      "odds": "-141",
+      "confidence": 66,
+      "note": "QB mismatch"
     },
     {
       "team": "Patriots",
-      "odds": "-197",
-      "confidence": 86,
+      "odds": "-138",
+      "confidence": 77,
       "note": "Weather edge"
     },
     {
-      "team": "49ers",
-      "odds": "-152",
-      "confidence": 81,
-      "note": "Revenge game"
-    },
-    {
-      "team": "Jets",
-      "odds": "-178",
-      "confidence": 72,
-      "note": "Weather edge"
+      "team": "Vikings",
+      "odds": "-120",
+      "confidence": 61,
+      "note": "Strong home trends"
     },
     {
       "team": "Packers",
-      "odds": "-208",
+      "odds": "-222",
       "confidence": 79,
-      "note": "Weather edge"
+      "note": "Strong home trends"
     },
     {
-      "team": "Packers",
-      "odds": "-249",
-      "confidence": 81,
-      "note": "QB mismatch"
+      "team": "Cowboys",
+      "odds": "-223",
+      "confidence": 80,
+      "note": "Strong home trends"
+    },
+    {
+      "team": "Vikings",
+      "odds": "-209",
+      "confidence": 60,
+      "note": "Weather edge"
     }
   ],
   "parlay_recommendations": [
     {
       "legs": [
-        "Dolphins ML",
+        "Bengals ML",
+        "Jets ML",
+        "Rams ML",
         "Patriots ML"
       ],
       "risk": "Moderate",
-      "payout": "+631",
-      "note": "Division rivalry"
+      "payout": "+858",
+      "note": "Underdog with upside"
     },
     {
       "legs": [
-        "Rams ML",
-        "Patriots ML",
-        "Eagles ML",
-        "Rams ML"
-      ],
-      "risk": "Aggressive",
-      "payout": "+407",
-      "note": "Division rivalry"
-    },
-    {
-      "legs": [
-        "Bills ML",
         "Bengals ML",
-        "Cowboys ML",
-        "Rams ML"
+        "Cowboys ML"
       ],
       "risk": "Aggressive",
-      "payout": "+323",
-      "note": "QB mismatch"
+      "payout": "+368",
+      "note": "Strong home trends"
     },
     {
       "legs": [
         "Browns ML",
-        "Patriots ML"
+        "Dolphins ML",
+        "Chiefs ML",
+        "Seahawks ML"
       ],
-      "risk": "Safe",
-      "payout": "+1162",
-      "note": "Division rivalry"
+      "risk": "Aggressive",
+      "payout": "+213",
+      "note": "Weather edge"
     }
   ],
-  "generated_at": "2025-06-14 00:57:59.683174"
+  "generated_at": "2025-06-14 15:25:44.868451"
 }

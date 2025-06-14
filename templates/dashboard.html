@@ -461,52 +461,28 @@ function logout() {
 }
 
 // Fetch and display news ticker items
-function fetchNewsTicker() {
-  fetch('/api/fantasy-news')
-    .then(res => res.json())
-    .then(data => {
-      const ticker = document.getElementById('news-ticker');
-      ticker.innerHTML = '';
-      data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'py-2';
-        div.innerHTML = `
-          <a href="${item.url}" target="_blank" class="text-light text-decoration-none">
-            <strong>${item.headline}</strong> - ${item.source}
-          </a>
-        `;
-        ticker.appendChild(div);
-      });
-    })
-    .catch(err => console.error('Error loading news ticker:', err));
-}
-
-// Initial fetch for news ticker
-fetchNewsTicker();
-
 fetch('/api/news')
   .then(res => res.json())
   .then(news => {
     const ticker = document.getElementById('news-ticker');
     if (!ticker) return;
     ticker.innerHTML = '';
-    news.forEach(item => {
+    // Show up to 7 news items, but never empty cards
+    news.slice(0, 7).forEach(item => {
       const card = document.createElement('div');
       card.className = 'news-item-card p-3 mb-2';
       card.style = `min-width: 220px; max-width: 240px; font-size: 0.95rem; padding: 0.7rem 0.6rem !important; background: linear-gradient(120deg, #23272f 80%, #00bfff22 100%); border-radius: 1rem; box-shadow: 0 2px 12px 0 rgba(0,191,255,0.10); border-left: 3px solid #00bfff; flex: 0 0 auto;`;
       card.innerHTML = `
         <div style='font-size:1.05rem;font-weight:700;color:#ffe066;'>
           <a href="${item.url || '#'}" target="_blank" rel="noopener noreferrer" style="color:#ffe066;text-decoration:underline;">
-            ${item.headline}
+            ${item.headline || '&nbsp;'}
           </a>
         </div>
-        <div class='text-muted small mb-1' style='color:#b8c1ec!important;'>${item.time}</div>
-        <div style='font-size:0.98rem;color:#f5f6fa;'>${item.summary}</div>
       `;
       ticker.appendChild(card);
     });
   })
-  .catch(() => {
+  .catch(err => {
     const ticker = document.getElementById('news-ticker');
     if (ticker) ticker.innerHTML = '<div class="text-danger">Could not load news.</div>';
   });

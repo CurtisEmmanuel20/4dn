@@ -17,8 +17,9 @@ from bets_recommendation_generator import generate_bets_data
 from datetime import datetime
 from matchup_pool import refresh_elite_matchups, current_elite_players
 from flask import render_template
-from scrapers.yahoo_news import scrape_yahoo_news
+from scrapers.yahoo_news import scrape_yahoo_news, get_yahoo_news_fallback
 from scrapers.fantasypros_news import scrape_fantasypros_news
+from scrapers.espn_news import scrape_espn_news
 import difflib
 import pytz
 from utils.fantasy_scraper import scrape_fantasypros_rankings, scrape_yahoo_adp, cache_player_data, load_cached_data
@@ -901,34 +902,37 @@ def get_4dn_board():
 def api_news():
     """
     Returns a list of fantasy football news items as JSON.
-    Now fetches live news from Yahoo Sports and FantasyPros, deduplicated by similar headlines.
+    Now fetches live news from Yahoo Sports only, and always returns 7 items, using cached news if needed.
     """
-    def deduplicate_news(news_items, threshold=0.7):
-        deduped = []
-        seen = []
-        for item in news_items:
-            headline = item['headline']
-            # Check if this headline is too similar to any already included
-            if any(difflib.SequenceMatcher(None, headline, s).ratio() > threshold for s in seen):
-                continue
-            deduped.append(item)
-            seen.append(headline)
-        return deduped
     try:
-        yahoo_news = scrape_yahoo_news(max_items=8)
-        fp_news = scrape_fantasypros_news(max_items=8)
-        news_items = (yahoo_news or []) + (fp_news or [])
-        news_items = deduplicate_news(news_items, threshold=0.7)
+        news_items = scrape_yahoo_news(max_items=20)
+        if len(news_items) < 7:
+            # Fill with cached news if available
+            cached = get_yahoo_news_fallback(count=7-len(news_items))
+            # Avoid duplicates
+            seen = {n['headline'] for n in news_items}
+            for n in cached:
+                if n['headline'] not in seen:
+                    news_items.append(n)
+                if len(news_items) >= 7:
+                    break
+        news_items = news_items[:7]
         if not news_items:
             raise Exception("No news scraped")
-    except Exception as e:
-        news_items = [
-            {"headline": "Justin Jefferson returns to practice, expected to play Week 1", "summary": "Vikings star WR Justin Jefferson (hamstring) was a full participant in Thursday's practice.", "time": "2h ago"},
-            {"headline": "Bijan Robinson primed for breakout season", "summary": "Falcons RB Bijan Robinson has impressed coaches and is expected to see a heavy workload.", "time": "3h ago"},
-            {"headline": "Patrick Mahomes: 'We're ready to defend our title'", "summary": "Chiefs QB Patrick Mahomes says the team is focused and healthy heading into the opener.", "time": "4h ago"},
-            {"headline": "CMC remains top fantasy pick despite tough schedule", "summary": "Christian McCaffrey (SF) faces a challenging slate but remains the consensus 1.01.", "time": "5h ago"},
-            {"headline": "Injury update: Cooper Kupp questionable for Week 1", "summary": "Rams WR Cooper Kupp (hamstring) is questionable but making progress.", "time": "6h ago"}
-        ]
+    except Exception:
+        # Fallback to cache only
+        news_items = get_yahoo_news_fallback(count=7)
+        if not news_items:
+            # Final static fallback
+            news_items = [
+                {"headline": "Justin Jefferson returns to practice, expected to play Week 1", "summary": "Vikings star WR Justin Jefferson (hamstring) was a full participant in Thursday's practice.", "time": "2h ago", "url": ""},
+                {"headline": "Bijan Robinson primed for breakout season", "summary": "Falcons RB Bijan Robinson has impressed coaches and is expected to see a heavy workload.", "time": "3h ago", "url": ""},
+                {"headline": "Patrick Mahomes: 'We're ready to defend our title'", "summary": "Chiefs QB Patrick Mahomes says the team is focused and healthy heading into the opener.", "time": "4h ago", "url": ""},
+                {"headline": "CMC remains top fantasy pick despite tough schedule", "summary": "Christian McCaffrey (SF) faces a challenging slate but remains the consensus 1.01.", "time": "5h ago", "url": ""},
+                {"headline": "Injury update: Cooper Kupp questionable for Week 1", "summary": "Rams WR Cooper Kupp (hamstring) is questionable but making progress.", "time": "6h ago", "url": ""},
+                {"headline": "NFL announces new kickoff rules for 2025 season", "summary": "The NFL has approved new kickoff rules aimed at player safety and more returns.", "time": "7h ago", "url": ""},
+                {"headline": "Rookie QBs impress at minicamps", "summary": "Several rookie quarterbacks are turning heads in early team activities.", "time": "8h ago", "url": ""}
+            ]
     return jsonify(news_items)
 
 @app.route('/subscription')

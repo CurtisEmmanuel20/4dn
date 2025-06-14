@@ -1,31 +1,34 @@
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
+import re
+import os
+import json
 
-def scrape_yahoo_news(max_items=10):
+def scrape_yahoo_news(max_items=20):
     """
-    Scrapes the latest NFL news headlines from Yahoo Sports.
-    Returns a list of dicts: {headline, summary, time}
+    Scrapes the latest NFL and general football news headlines from Yahoo Sports.
+    Returns a list of dicts: {headline, summary, time, url}
     """
     url = "https://sports.yahoo.com/nfl/"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-
     news_items = []
-    # Yahoo's NFL news headlines are typically in <li> or <div> elements with specific classes
-    # We'll look for headline blocks in the main news section
-    for article in soup.select('li.js-stream-content, div.js-stream-content'):
+    seen = set()
+    # Grab all news articles in the main feed
+    for article in soup.find_all(['li', 'div'], class_=re.compile(r'js-stream-content')):
         headline_tag = article.find('h3')
         summary_tag = article.find('p')
         time_tag = article.find('time')
         link_tag = article.find('a', href=True)
-        if not headline_tag:
+        if not headline_tag or not link_tag:
             continue
         headline = headline_tag.get_text(strip=True)
+        if headline in seen:
+            continue
+        seen.add(headline)
         summary = summary_tag.get_text(strip=True) if summary_tag else ''
         time_str = time_tag.get_text(strip=True) if time_tag else ''
-        url = link_tag['href'] if link_tag else ''
-        # Yahoo sometimes uses relative URLs
+        url = link_tag['href']
         if url and url.startswith('/'):
             url = f'https://sports.yahoo.com{url}'
         news_items.append({
@@ -36,4 +39,22 @@ def scrape_yahoo_news(max_items=10):
         })
         if len(news_items) >= max_items:
             break
+    # Save to disk for fallback
+    if news_items:
+        try:
+            with open('data/yahoo_news_cache.json', 'w', encoding='utf-8') as f:
+                json.dump(news_items, f)
+        except Exception:
+            pass
     return news_items
+
+def get_yahoo_news_fallback(count=7):
+    """
+    Loads cached Yahoo news from disk for fallback.
+    """
+    try:
+        with open('data/yahoo_news_cache.json', 'r', encoding='utf-8') as f:
+            news_items = json.load(f)
+        return news_items[:count]
+    except Exception:
+        return []
