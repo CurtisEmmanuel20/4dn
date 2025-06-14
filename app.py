@@ -794,17 +794,23 @@ def auth():
 def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
+    print(f"[DEBUG] Login attempt for email: {email}")
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute('SELECT id, username, password, season_pass FROM users WHERE email = ?', (email,))
     user = c.fetchone()
+    print(f"[DEBUG] DB user row: {user}")
     conn.close()
+    if user:
+        print(f"[DEBUG] Checking password: {password} against hash: {user[2]}")
     if user and check_password_hash(user[2], password):
+        print(f"[DEBUG] Login successful for user_id: {user[0]}")
         session['user_id'] = user[0]
         session['username'] = user[1]
         session['season_pass'] = bool(user[3])
         return redirect(url_for('account_dashboard'))
     else:
+        print(f"[DEBUG] Invalid credentials for email: {email}")
         return render_template('auth.html', error='Invalid credentials.', error_type='login')
 
 @app.route('/signup', methods=['POST'])
@@ -812,17 +818,22 @@ def signup_post():
     username = request.form.get('username')
     email = request.form.get('email')
     password = request.form.get('password')
+    print(f"[DEBUG] Signup attempt: username={username}, email={email}")
     if not username or not email or not password:
+        print("[DEBUG] Signup failed: missing fields")
         return render_template('auth.html', error='All fields required.', error_type='signup')
     hashed_pw = generate_password_hash(password)
+    print(f"[DEBUG] Hashed password: {hashed_pw}")
     try:
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         c.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', (username, email, hashed_pw))
         conn.commit()
         conn.close()
+        print(f"[DEBUG] Signup success for {email}")
         return render_template('auth.html', error='Account created! Please log in.', error_type='login')
     except sqlite3.IntegrityError:
+        print(f"[DEBUG] Signup failed: username or email exists for {email}")
         return render_template('auth.html', error='Username or email already exists.', error_type='signup')
 
 @app.route('/account')
@@ -1023,6 +1034,19 @@ def stripe_webhook():
             conn.commit()
             conn.close()
     return jsonify({'status': 'success'})
+
+@app.route('/debug-users')
+def debug_users():
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('SELECT id, username, email, password, season_pass FROM users')
+    users = c.fetchall()
+    conn.close()
+    html = '<h2>All Users in DB</h2><table border=1><tr><th>ID</th><th>Username</th><th>Email</th><th>Password Hash</th><th>Season Pass</th></tr>'
+    for u in users:
+        html += f'<tr><td>{u[0]}</td><td>{u[1]}</td><td>{u[2]}</td><td>{u[3]}</td><td>{u[4]}</td></tr>'
+    html += '</table>'
+    return html
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

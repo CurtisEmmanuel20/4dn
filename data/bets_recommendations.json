@@ -1,67 +1,95 @@
 {
   "moneyline_picks": [
     {
-      "team": "Bills",
-      "odds": "-223",
-      "confidence": 65,
-      "note": "Mahomes vs bottom-10 defense"
-    },
-    {
-      "team": "Jets",
-      "odds": "-158",
-      "confidence": 64,
+      "team": "Cowboys",
+      "odds": "-178",
+      "confidence": 75,
       "note": "Division rivalry"
     },
     {
+      "team": "Jets",
+      "odds": "-220",
+      "confidence": 60,
+      "note": "Elite defense and home advantage"
+    },
+    {
       "team": "Bills",
-      "odds": "-127",
-      "confidence": 61,
-      "note": "Mahomes vs bottom-10 defense"
+      "odds": "-168",
+      "confidence": 78,
+      "note": "Weather edge"
+    },
+    {
+      "team": "Patriots",
+      "odds": "-197",
+      "confidence": 86,
+      "note": "Weather edge"
+    },
+    {
+      "team": "49ers",
+      "odds": "-152",
+      "confidence": 81,
+      "note": "Revenge game"
     },
     {
       "team": "Jets",
-      "odds": "-181",
-      "confidence": 89,
-      "note": "QB mismatch"
+      "odds": "-178",
+      "confidence": 72,
+      "note": "Weather edge"
     },
     {
-      "team": "Eagles",
-      "odds": "-242",
-      "confidence": 90,
-      "note": "Mahomes vs bottom-10 defense"
+      "team": "Packers",
+      "odds": "-208",
+      "confidence": 79,
+      "note": "Weather edge"
+    },
+    {
+      "team": "Packers",
+      "odds": "-249",
+      "confidence": 81,
+      "note": "QB mismatch"
     }
   ],
   "parlay_recommendations": [
     {
       "legs": [
-        "Jets ML",
-        "Bengals ML"
+        "Dolphins ML",
+        "Patriots ML"
       ],
       "risk": "Moderate",
-      "payout": "+912",
-      "note": "Elite defense and home advantage"
+      "payout": "+631",
+      "note": "Division rivalry"
     },
     {
       "legs": [
-        "Cowboys ML",
+        "Rams ML",
+        "Patriots ML",
+        "Eagles ML",
+        "Rams ML"
+      ],
+      "risk": "Aggressive",
+      "payout": "+407",
+      "note": "Division rivalry"
+    },
+    {
+      "legs": [
+        "Bills ML",
+        "Bengals ML",
         "Cowboys ML",
         "Rams ML"
       ],
       "risk": "Aggressive",
-      "payout": "+745",
-      "note": "Underdog with upside"
+      "payout": "+323",
+      "note": "QB mismatch"
     },
     {
       "legs": [
-        "Vikings ML",
         "Browns ML",
-        "Giants ML",
-        "Seahawks ML"
+        "Patriots ML"
       ],
-      "risk": "Moderate",
-      "payout": "+473",
-      "note": "Strong home trends"
+      "risk": "Safe",
+      "payout": "+1162",
+      "note": "Division rivalry"
     }
   ],
-  "generated_at": "2025-06-14 00:31:47.900960"
+  "generated_at": "2025-06-14 00:57:59.683174"
 }
