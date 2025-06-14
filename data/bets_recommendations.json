@@ -1,68 +1,67 @@
 {
   "moneyline_picks": [
     {
-      "team": "Chiefs",
-      "odds": "-146",
-      "confidence": 71,
-      "note": "Weather edge"
-    },
-    {
-      "team": "Chiefs",
+      "team": "Bills",
       "odds": "-223",
-      "confidence": 62,
-      "note": "Injury boost"
-    },
-    {
-      "team": "Packers",
-      "odds": "-118",
-      "confidence": 61,
-      "note": "Revenge game"
+      "confidence": 65,
+      "note": "Mahomes vs bottom-10 defense"
     },
     {
       "team": "Jets",
-      "odds": "-243",
-      "confidence": 66,
-      "note": "Strong home trends"
+      "odds": "-158",
+      "confidence": 64,
+      "note": "Division rivalry"
     },
     {
-      "team": "Dolphins",
-      "odds": "-245",
-      "confidence": 68,
-      "note": "Hot streak"
+      "team": "Bills",
+      "odds": "-127",
+      "confidence": 61,
+      "note": "Mahomes vs bottom-10 defense"
+    },
+    {
+      "team": "Jets",
+      "odds": "-181",
+      "confidence": 89,
+      "note": "QB mismatch"
+    },
+    {
+      "team": "Eagles",
+      "odds": "-242",
+      "confidence": 90,
+      "note": "Mahomes vs bottom-10 defense"
     }
   ],
   "parlay_recommendations": [
     {
       "legs": [
-        "Eagles ML",
-        "49ers ML",
-        "Giants ML",
-        "Dolphins ML"
-      ],
-      "risk": "Aggressive",
-      "payout": "+1127",
-      "note": "Weather edge"
-    },
-    {
-      "legs": [
-        "Giants ML",
+        "Jets ML",
         "Bengals ML"
       ],
       "risk": "Moderate",
-      "payout": "+608",
-      "note": "Weather edge"
+      "payout": "+912",
+      "note": "Elite defense and home advantage"
     },
     {
       "legs": [
-        "Eagles ML",
-        "Eagles ML",
-        "Vikings ML",
-        "Cowboys ML"
+        "Cowboys ML",
+        "Cowboys ML",
+        "Rams ML"
       ],
       "risk": "Aggressive",
-      "payout": "+716",
-      "note": "Elite defense and home advantage"
+      "payout": "+745",
+      "note": "Underdog with upside"
+    },
+    {
+      "legs": [
+        "Vikings ML",
+        "Browns ML",
+        "Giants ML",
+        "Seahawks ML"
+      ],
+      "risk": "Moderate",
+      "payout": "+473",
+      "note": "Strong home trends"
     }
   ],
-  "generated_at": "2025-06-07 15:05:00.019405"
+  "generated_at": "2025-06-14 00:31:47.900960"
 }

@@ -928,15 +928,14 @@ def subscription():
 def create_checkout_session():
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
-        mode='subscription',
+        mode='payment',
         line_items=[{
             'price_data': {
                 'currency': 'usd',
                 'product_data': {
-                    'name': '4DN Premium Subscription',
+                    'name': '4DN Lifetime Pass',
                 },
-                'unit_amount': 999,
-                'recurring': {'interval': 'month'},
+                'unit_amount': 900,  # $9.00 in cents
             },
             'quantity': 1,
         }],
@@ -992,6 +991,38 @@ def league_newsroom():
     from utils.league_newsroom import generate_fake_news_data
     news_data = generate_fake_news_data(league_id="demo")  # Update later for real integrations
     return render_template("league_newsroom.html", news_data=news_data)
+
+# Stripe webhook endpoint for payment events
+import stripe
+import sqlite3
+from flask import request, jsonify
+
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+@app.route('/stripe-webhook', methods=['POST'])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+    event = None
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError:
+        return 'Invalid signature', 400
+
+    if event['type'] == 'checkout.session.completed':
+        session_obj = event['data']['object']
+        customer_email = session_obj.get('customer_details', {}).get('email')
+        if customer_email:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute('UPDATE users SET season_pass = 1 WHERE email = ?', (customer_email,))
+            conn.commit()
+            conn.close()
+    return jsonify({'status': 'success'})
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
