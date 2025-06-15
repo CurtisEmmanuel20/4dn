@@ -108,13 +108,39 @@
     font-size: 0.95rem !important;
   }
   /* Chat font size */
-  #chat-log, .chat-msg-user, .chat-msg-ai {
+  #chat-log {
     font-size: 0.98rem !important;
     padding: 0.5em 0.8em !important;
+    background: #181c24;
+    border-radius: 1rem;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
   }
-  #chat .card-header, #chat .card-title, #chat .card {
-    font-size: 1rem !important;
-    padding: 0.7rem 1rem !important;
+  .chat-msg-user {
+    align-self: flex-end;
+    background: linear-gradient(90deg,#00bfff22 0%,#00ff9922 100%);
+    color: #00ff99;
+    border-radius: 1.2em 1.2em 0.2em 1.2em;
+    padding: 0.5em 1em;
+    margin: 0.1em 0;
+    max-width: 80%;
+    box-shadow: 0 2px 8px #00ff9933;
+    font-weight: 500;
+    text-align: right;
+  }
+  .chat-msg-ai {
+    align-self: flex-start;
+    background: linear-gradient(90deg,#23273a 0%,#00bfff22 100%);
+    color: #ffe066;
+    border-radius: 1.2em 1.2em 1.2em 0.2em;
+    padding: 0.5em 1em;
+    margin: 0.1em 0;
+    max-width: 80%;
+    box-shadow: 0 2px 8px #00bfff33;
+    font-weight: 500;
+    text-align: left;
   }
   /* Big Board Card Style */
   .big-board-card {
@@ -261,7 +287,7 @@
   <!-- 4DN Fantasy Big Board (Modernized) -->
   <div class="row mt-4">
     <div class="col-12">
-      <div class="big-board-card">
+      <div class="big-board-card text-center">
         <h4 class="mb-0 fw-bold">🏈 4DN Fantasy Big Board</h4>
         <small>Top 100 | Updated Weekly | Proprietary 4DN Score</small>
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
@@ -331,7 +357,7 @@
       <div class="card shadow-lg border-0" style="border-radius:1.5rem; background:linear-gradient(120deg,#23272f 80%,#00bfff22 100%);">
         <div class="card-header d-flex align-items-center" style="background:linear-gradient(90deg,#181c24 70%,#00bfff22 100%); border-top-left-radius:1.5rem; border-top-right-radius:1.5rem; border-bottom:1px solid #23272f;">
           <span style="font-size:1.5rem; color:#00bfff; margin-right:0.7rem;">🤖</span>
-          <h4 class="mb-0 fw-bold" style="color:#00bfff; letter-spacing:1px;">Fantasy Assistant AI Chat</h4>
+          <h4 class="mb-0 fw-bold ai-os-title" style="color:#00bfff; letter-spacing:1px;">4DN OS <span class="ai-os-subtitle d-block d-md-inline" style="font-size:1rem; color:#b0b6c3; font-weight:400; margin-left:0.5em;">The operating system for smarter fantasy decisions.</span></h4>
         </div>
         <div class="card-body p-4" style="background:transparent;">
           <div id="chat-log" class="bg-dark rounded-4 p-4 mb-3 shadow-sm" style="height: 240px; max-height: 240px; overflow-y: auto; font-size:1.08rem; color:#ffe066; border:1.5px solid #00bfff33; box-shadow:0 2px 12px #00bfff22;">
@@ -341,7 +367,7 @@
             <textarea id="chat-input" class="form-control border-0 bg-transparent text-light" placeholder="Type your fantasy football question..." rows="2" style="resize:none; font-size:1.08rem; box-shadow:none;"></textarea>
             <button id="chat-submit" class="btn btn-accent" type="button" style="background:linear-gradient(90deg,#00bfff 0%,#00ff99 100%); color:#181c24; font-weight:700; border:none; border-radius:0; letter-spacing:1px; min-width:120px;">Ask 4DN</button>
           </div>
-          <small class="text-muted d-block mt-2" style="color:#b0b6c3!important;">Start/Sit, trade, and matchup advice powered by GPT-4o and real stats.</small>
+          <small class="text-muted d-block mt-2" style="color:#b0b6c3!important;">What is the 4DN Season Pass, Start Sit, How are betting recommendations calculated?</small>
         </div>
       </div>
     </div>
@@ -385,6 +411,10 @@
       </div>
     </div>
   </div>
+</div>
+<!-- Ad Placement: Sidebar -->
+<div id="ad-sidebar" class="ad-placeholder" style="width:100%; min-height:200px; background:rgba(0,191,255,0.04); display:flex; align-items:center; justify-content:center; color:#00bfff; font-size:1.05rem; font-weight:600; letter-spacing:1px; margin-bottom:1.5rem;">
+  <!-- Future ad will go here -->
 </div>
 <script>
 // Set QB as default filter on load
@@ -504,4 +534,4 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-{% endblock %}
+{% endblock %
