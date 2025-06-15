@@ -27,6 +27,7 @@ from ranking_engine import generate_4dn_rankings
 from caching.fantasy_cache import save_big_board_cache, load_cached_big_board
 import atexit
 from rankings_data import RANKINGS
+import logging
 
 load_dotenv()  # This loads the .env file
 
@@ -215,7 +216,7 @@ def fantasy_chat():
         "You ONLY answer questions about fantasy football, NFL, players, teams, draft strategy, projections, injuries, trades, and related topics, as well as questions about the 4DN Fantasy Football website and its features. "
         "You are deeply versed in all fantasy football formats (redraft, dynasty, best ball, DFS, IDP, superflex, etc.), scoring systems (PPR, half-PPR, standard, etc.), and advanced terminology (ADP, waiver wire, handcuff, sleeper, etc.). "
         "You know that Opening Day for the 2025 NFL season is September 4, 2025. If a user asks about Opening Day, explain what it is and when it is. "
-        "You know the Season Pass is a one-time $10 purchase (pre-sale, normally $25) that unlocks all premium features on the site for the entire 2025 fantasy football season. It covers access to draft tools, rankings, AI chat, DFS tools, betting insights, and more, and expires at the end of the 2025 season. There are no recurring charges. "
+        "You know the Season Pass is a one-time $9 purchase (pre-sale, normally $17) that unlocks all premium features on the site for the entire 2025 fantasy football season. It covers access to draft tools, rankings, AI chat, DFS tools, betting insights, and more, and expires at the end of the 2025 season. There are no recurring charges. "
         "If a user asks about the Season Pass, explain what it is, what it gives, how it works, and how to get it. "
         "You are also trained to answer most customer-related questions, such as how to sign up, how to log in, how to reset a password, how to use the Big Board, how to access features, and how to get support. Always provide clear, step-by-step instructions and be friendly and helpful. "
         "If a question is not about football, the website, or customer support, politely refuse.\n"
@@ -261,6 +262,7 @@ def fantasy_chat():
             reply = '\n'.join(player_stats) + '\n' + reply
         return {"response": reply}, 200
     except Exception as e:
+        logging.exception("Error in /api/fantasy-chat")
         return {"error": f"AI error: {str(e)}"}, 500
 
 @app.route("/api/trending")
@@ -1057,4 +1059,5 @@ def about():
     return render_template('about.html')
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
