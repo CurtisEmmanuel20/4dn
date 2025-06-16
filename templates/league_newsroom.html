@@ -100,11 +100,77 @@
   .btn-sync:hover {
     background-color: #009acd;
   }
+  .newsroom-intro {
+    background: rgba(24,28,36,0.85);
+    border-left: 5px solid #00bfff;
+    padding: 1.2rem 1.5rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px #00bfff22;
+  }
+  .newsroom-features {
+    background: rgba(36,40,50,0.95);
+    border-left: 4px solid #ffe066;
+    padding: 1.2rem 1.5rem;
+    border-radius: 1rem;
+    margin-bottom: 2.2rem;
+    box-shadow: 0 2px 12px #ffe06622;
+  }
 </style>
 <div class="container mt-4 text-light">
     <div class="newsroom-section-header-row">
       <div class="newsroom-section-header">📰 Fantasy Newsroom</div>
       <button id="syncToggleBtn" class="sync-btn sync">Sync League</button>
+    </div>
+    <div class="newsroom-intro mb-4" style="background:rgba(24,28,36,0.85);border-left:5px solid #00bfff;padding:1.2rem 1.5rem 1.2rem 1.2rem;border-radius:1rem;margin-bottom:2rem;box-shadow:0 2px 12px #00bfff22;">
+      <strong>🏈 Fantasy League HQ: Your League. Our Coverage. NFL Style.</strong><br>
+      Where fantasy meets primetime.<br>
+      Live trades, power rankings, and matchup breakdowns — treated like breaking news from the league office. Your season isn’t just fantasy anymore. It's football media built for your league.
+    </div>
+    <div class="newsroom-features mb-4" style="background:rgba(36,40,50,0.95);border-left:4px solid #ffe066;padding:1.2rem 1.5rem 1.2rem 1.2rem;border-radius:1rem;margin-bottom:2.2rem;box-shadow:0 2px 12px #ffe06622;">
+      <div style="margin-bottom:1.2rem;"><span style="font-size:1.2rem;">✅ <strong>Feature 1: Power Rankings with AI Commentary</strong></span>
+        <pre style="background:#23272f;color:#00ff99;padding:0.7rem 1rem;border-radius:0.7rem;margin-top:0.5rem;font-size:0.98rem;white-space:pre-wrap;word-break:break-word;"><b>🧠 Prompt to Copilot:</b>
+Create a function <code>generatePowerRankings(teams)</code> that takes mock data of fantasy teams with the following fields: teamName, wins, losses, ties, PF (Points For), and PA (Points Against).
+
+Sort teams by:
+1. Win percentage
+2. Points For (PF)
+3. Point Differential (PF - PA)
+
+Then, for each team, generate a short commentary string (1–2 sentences) using simple logic or random variation, such as “Dominating both sides of the ball” or “Needs a bounce-back week.”
+
+Return a list of objects:
+{ rank, teamName, record, PF, PA, comment }
+
+Use mock team data for now, but structure the function so that later it can accept real-time data from a backend API (like /api/standings or /api/league-summary).</pre>
+      </div>
+      <div style="margin-bottom:1.2rem;"><span style="font-size:1.2rem;">✅ <strong>Feature 2: Trade Grades</strong></span>
+        <pre style="background:#23272f;color:#00ff99;padding:0.7rem 1rem;border-radius:0.7rem;margin-top:0.5rem;font-size:0.98rem;white-space:pre-wrap;word-break:break-word;"><b>🧠 Prompt to Copilot:</b>
+Create a function <code>gradeTrade(trade)</code> that evaluates a trade between two teams using mock player value tiers.
+
+Each player should have a mock value from 1–100. Assign grades A–F to each team based on total player value received compared to value given away.
+
+Use mock player data for now (with a sample player value map), but leave a placeholder to fetch player rankings or stats from live API later (e.g., /api/player-values or /api/fantasy-stats).
+
+Output:
+{
+  teamAGrade: 'B',
+  teamBGrade: 'A',
+  analysis: 'Team B wins the trade by acquiring the top-tier RB.'}</pre>
+      </div>
+      <div><span style="font-size:1.2rem;">✅ <strong>Feature 7: Playoff Race Tracker</strong></span>
+        <pre style="background:#23272f;color:#00ff99;padding:0.7rem 1rem;border-radius:0.7rem;margin-top:0.5rem;font-size:0.98rem;white-space:pre-wrap;word-break:break-word;"><b>🧠 Prompt to Copilot:</b>
+Create a <code>PlayoffRaceTracker</code> component that displays:
+- Top 6 teams as “In the Playoffs” ✅
+- Teams ranked 7–8 as “In the Hunt” 🔥
+- All others as “Outside Looking In” ❌
+
+Use mock standings data now, sorted by record, then PF and PA as tiebreakers.
+
+Label teams with icons: ✅ 🔥 ❌
+
+Structure it so that standings data can later be fetched from <code>/api/standings</code> or another</pre>
+      </div>
     </div>
     <div class="newsroom-card mb-4">
         <h5 class="card-title">Top Headlines</h5>
