@@ -1005,9 +1005,136 @@ def buy_season_pass():
 
 @app.route('/league-newsroom')
 def league_newsroom():
+    import os
+    print('Current working directory:', os.getcwd())
     from utils.league_newsroom import generate_fake_news_data
     news_data = generate_fake_news_data(league_id="demo")  # Update later for real integrations
-    return render_template("league_newsroom.html", news_data=news_data)
+
+    # --- Feature 1: 4DN Power Index & AI Insights ---
+    mock_teams = [
+        {'teamName': 'Gridiron Gurus', 'wins': 4, 'losses': 1, 'ties': 0, 'PF': 612, 'PA': 501, 'high_score': 52, 'low_score': 14},
+        {'teamName': 'Pigskin Prophets', 'wins': 4, 'losses': 1, 'ties': 0, 'PF': 599, 'PA': 488, 'high_score': 48, 'low_score': 18},
+        {'teamName': 'Endzone Engineers', 'wins': 3, 'losses': 2, 'ties': 0, 'PF': 577, 'PA': 520, 'high_score': 45, 'low_score': 16},
+        {'teamName': 'Fantasy Phantoms', 'wins': 3, 'losses': 2, 'ties': 0, 'PF': 570, 'PA': 545, 'high_score': 50, 'low_score': 12},
+        {'teamName': 'Touchdown Titans', 'wins': 3, 'losses': 2, 'ties': 0, 'PF': 561, 'PA': 533, 'high_score': 44, 'low_score': 20},
+        {'teamName': 'Red Zone Renegades', 'wins': 3, 'losses': 2, 'ties': 0, 'PF': 555, 'PA': 540, 'high_score': 41, 'low_score': 17},
+        {'teamName': 'Blitz Brigade', 'wins': 2, 'losses': 3, 'ties': 0, 'PF': 540, 'PA': 560, 'high_score': 39, 'low_score': 10},
+        {'teamName': 'Hail Mary Heroes', 'wins': 2, 'losses': 3, 'ties': 0, 'PF': 528, 'PA': 570, 'high_score': 38, 'low_score': 13},
+        {'teamName': 'Gridiron Goats', 'wins': 2, 'losses': 3, 'ties': 0, 'PF': 520, 'PA': 590, 'high_score': 36, 'low_score': 9},
+        {'teamName': 'Snap Count Savants', 'wins': 1, 'losses': 4, 'ties': 0, 'PF': 510, 'PA': 600, 'high_score': 35, 'low_score': 8},
+        {'teamName': 'Pylon Pilots', 'wins': 1, 'losses': 4, 'ties': 0, 'PF': 498, 'PA': 610, 'high_score': 33, 'low_score': 7},
+        {'teamName': 'Bye Week Ballers', 'wins': 0, 'losses': 5, 'ties': 0, 'PF': 480, 'PA': 620, 'high_score': 30, 'low_score': 5},
+    ]
+    def norm(val, all_vals):
+        min_v, max_v = min(all_vals), max(all_vals)
+        return (val - min_v) / (max_v - min_v) if max_v > min_v else 0.5
+    def win_pct(team):
+        total_games = team['wins'] + team['losses'] + team['ties']
+        return team['wins'] / total_games if total_games else 0
+    def point_diff(team):
+        return team['PF'] - team['PA']
+    commentary_options = [
+        "Dominating both sides of the ball.",
+        "Needs a bounce-back week.",
+        "Sneaky playoff contender.",
+        "Offense firing on all cylinders.",
+        "Defense needs tightening up.",
+        "Riding a hot streak!",
+        "Looking for answers after a tough loss.",
+        "Primed for a playoff push.",
+        "Injury bug biting at the wrong time.",
+        "Making all the right moves.",
+    ]
+    import random
+    # Precompute normalization lists
+    pf_list = [t['PF'] for t in mock_teams]
+    pd_list = [point_diff(t) for t in mock_teams]
+    high_list = [t['high_score'] for t in mock_teams]
+    low_list = [t['low_score'] for t in mock_teams]
+    # Calculate power index for each team
+    def power_index(team):
+        return (
+            win_pct(team) * 0.5 +
+            norm(team['PF'], pf_list) * 0.2 +
+            norm(point_diff(team), pd_list) * 0.15 +
+            norm(team['high_score'], high_list) * 0.1 +
+            (1 - norm(team['low_score'], low_list)) * 0.05
+        )
+    sorted_teams = sorted(
+        mock_teams,
+        key=lambda t: power_index(t),
+        reverse=True
+    )
+    power_rankings = []
+    for idx, team in enumerate(sorted_teams, 1):
+        comment = random.choice(commentary_options)
+        record = f"{team['wins']}-{team['losses']}-{team['ties']}"
+        power_rankings.append({
+            'rank': idx,
+            'teamName': team['teamName'],
+            'record': record,
+            'PF': team['PF'],
+            'PA': team['PA'],
+            'comment': comment
+        })
+
+    # --- Feature 2: Trade Analyzer & Value Grades ---
+    player_values = {
+        'Christian McCaffrey': 98,
+        'DeVonta Smith': 85,
+        '2026 pick': 40,
+        'Dalton Schultz': 60,
+        'Jimmy Garoppolo': 30,
+    }
+    trade = {
+        'teamA': 'Team A',
+        'teamB': 'Team B',
+        'teamA_gives': ['Christian McCaffrey'],
+        'teamB_gives': ['DeVonta Smith', '2026 pick']
+    }
+    def total_value(players):
+        return sum(player_values.get(p, 50) for p in players)
+    a_value = total_value(trade['teamB_gives'])
+    b_value = total_value(trade['teamA_gives'])
+    def grade(val):
+        if val >= 95: return 'A+'
+        if val >= 90: return 'A'
+        if val >= 80: return 'B'
+        if val >= 70: return 'C'
+        if val >= 60: return 'D'
+        return 'F'
+    teamA_grade = grade(a_value)
+    teamB_grade = grade(b_value)
+    if b_value > a_value:
+        analysis = f"{trade['teamB']} wins the trade by acquiring the top-tier {trade['teamA_gives'][0]}."
+    elif a_value > b_value:
+        analysis = f"{trade['teamA']} wins the trade by acquiring more depth."
+    else:
+        analysis = "This trade is a toss-up."
+    trade_result = {
+        'teamA': trade['teamA'],
+        'teamB': trade['teamB'],
+        'teamA_gives': trade['teamA_gives'],
+        'teamB_gives': trade['teamB_gives'],
+        'teamAGrade': teamA_grade,
+        'teamBGrade': teamB_grade,
+        'analysis': analysis
+    }
+
+    # --- Feature 3: Playoff Probability Tracker ---
+    playoff_teams = power_rankings[:6]
+    in_hunt_teams = power_rankings[6:8]
+    outside_teams = power_rankings[8:]
+
+    return render_template(
+        "league_newsroom.html",
+        news_data=news_data,
+        power_rankings=power_rankings,
+        trade_result=trade_result,
+        playoff_teams=playoff_teams,
+        in_hunt_teams=in_hunt_teams,
+        outside_teams=outside_teams
+    )
 
 # Stripe webhook endpoint for payment events
 import stripe
@@ -1058,6 +1185,64 @@ def debug_users():
 def about():
     return render_template('about.html')
 
+# --- Sync League Route ---
+@app.route('/sync-league', methods=['POST'])
+def sync_league():
+    data = request.get_json()
+    api_key = data.get('api_key')
+    league_name = data.get('league_name', 'My League')
+    owner_id = session.get('user_id')  # Assumes user is logged in
+    import random, string
+    share_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('INSERT INTO leagues (name, api_key, owner_id, share_code) VALUES (?, ?, ?, ?)',
+              (league_name, api_key, owner_id, share_code))
+    league_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True, 'share_code': share_code, 'league_id': league_id})
+
+@app.route('/league/<share_code>')
+def view_league(share_code):
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('SELECT id, name FROM leagues WHERE share_code = ?', (share_code,))
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return 'League not found', 404
+    league_id, league_name = row
+    # Fetch league data here (mock for now)
+    # You can reuse the generate_fake_news_data or similar
+    from utils.league_newsroom import generate_fake_news_data
+    news_data = generate_fake_news_data(league_id=league_id)
+    return render_template('league_newsroom.html', news_data=news_data, league_name=league_name, share_code=share_code, read_only=True)
+
+@app.route('/save-league', methods=['POST'])
+def save_league():
+    data = request.get_json()
+    league_id = data.get('league_id')
+    user_id = session.get('user_id')
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('INSERT OR IGNORE INTO user_leagues (user_id, league_id) VALUES (?, ?)', (user_id, league_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+@app.route('/my-leagues')
+def my_leagues():
+    user_id = session.get('user_id')
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute('''SELECT l.id, l.name, l.share_code FROM leagues l
+                 JOIN user_leagues ul ON l.id = ul.league_id
+                 WHERE ul.user_id = ?''', (user_id,))
+    leagues = [{'id': row[0], 'name': row[1], 'share_code': row[2]} for row in c.fetchall()]
+    conn.close()
+    return render_template('my_leagues.html', leagues=leagues)
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(debug=True, host="0.0.0.0", port=port)

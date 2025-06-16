@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4 text-light">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold" style="color:#00bfff;">My Leagues</h2>
+    <a href="/sync-league" class="btn btn-accent fw-bold" style="background:linear-gradient(90deg,#00bfff 0%,#00ff99 100%); color:#181c24; border-radius:0.7rem;">+ Sync New League</a>
+  </div>
+  {% if leagues %}
+    <div class="row">
+      {% for league in leagues %}
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card" style="background:#23272f; border-radius:1rem;">
+          <div class="card-body">
+            <h5 class="card-title" style="color:#ffe066;">{{ league.name }}</h5>
+            <div class="mb-2"><span class="badge bg-info">Code: {{ league.share_code }}</span></div>
+            <a href="/league/{{ league.share_code }}" class="btn btn-outline-accent btn-sm">View League</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">You have not saved any leagues yet. Use the + button to sync or save a league.</div>
+  {% endif %}
+</div>
+{% endblock %}
