@@ -30,7 +30,42 @@
     4DN was built by passionate fantasy players and sports bettors who wanted deeper, smarter tools than anything else on the market. Every feature is designed to answer the real questions you face on game day — with the clarity and speed only automated intelligence can provide.
   </p>
   <p style="font-size:1.08rem; color:#aaa; max-width:800px;">
-    Have questions, feedback, or partnership ideas? <a href="mailto:support@4dnfantasy.com" style="color:#00bfff;">Contact us here</a> — we’d love to hear from you.
+    Have questions, feedback, or partnership ideas? <a href="#" onclick="openContactModal();return false;" style="color:#00bfff;">Contact us here</a> — we’d love to hear from you.
   </p>
 </div>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:18px; background:#23283a; color:#f5f6fa; box-shadow:0 8px 32px rgba(0,0,0,0.25);">
+      <div class="modal-header" style="border-bottom:1px solid #222b3a;">
+        <h5 class="modal-title" id="contactModalLabel" style="color:#00bfff;">Contact Us</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="mailto:MaisonEmmanuel12@Gmail.com" method="POST" enctype="text/plain">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="contactEmail" class="form-label">Your Email</label>
+            <input type="email" class="form-control" id="contactEmail" name="email" placeholder="you@email.com" required style="background:#181c24; color:#fff; border:1px solid #333;">
+          </div>
+          <div class="mb-3">
+            <label for="contactMessage" class="form-label">Message</label>
+            <textarea class="form-control" id="contactMessage" name="message" rows="4" placeholder="Type your message here..." required style="background:#181c24; color:#fff; border:1px solid #333;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid #222b3a;">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="background:#00bfff; border:none;">Send Message</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    function openContactModal() {
+      const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+      modal.show();
+    }
+  </script>
 {% endblock %}
